@@ -41,6 +41,7 @@ pacman::p_load(dplyr, d3heatmap)
 <br>
 
 - - -
+
 ```{r results='hide',message=FALSE}
 library(dplyr)
 library(lubridate)
@@ -57,6 +58,7 @@ library(ggplot2)
 mvt <- read.csv("data/mvtWeek1.csv", header = T, stringsAsFactors = F)
 # 用nrow即可知道rows of data是多少，此dataset為191641
 nrow(mvt)
+
 ```
 
 檢查各欄位的資料格式
@@ -94,6 +96,7 @@ __Ans:__ 111
 sum(mvt$Arrest)
 ```
 __Ans:__ 15536
+
 【1.6】 How many observations have a LocationDescription value of ALLEY?
 ```{r}
 # 用dplyr 選mvt操作先filter出LocationDescription等於ALLEY，再用nrow算出observations之值
@@ -102,6 +105,7 @@ mvt %>%
   nrow()
 ```
 __Ans:__ 2308
+
 
 <br><br>
 
@@ -144,6 +148,7 @@ hist(DateConvert,"year",las=2,freq=T,xlab="")
 table(format(DateConvert, "%u"), format(DateConvert, "%H")) %>% 
   as.data.frame.matrix() %>% 
   d3heatmap(F, F, col = colorRamp(c('seagreen','lightyellow','red')))
+
 ```
 
 
@@ -228,6 +233,7 @@ table(mvt$Arrest, mvt$Year) %>%
 ```
 __Ans:__ 0.039
 
+
 <br><br>
 
 - - -
@@ -247,6 +253,7 @@ table(mvt$LocationDescription) %>%
 (top5 = names(table(mvt$LocationDescription) %>% sort %>% tail(6))[-4])
 
 sum(mvt$LocationDescription %in% top5)  # 177510
+
 ```
 
 【4.3】 One of the locations has a much higher arrest rate than the other locations. Which is it? 
