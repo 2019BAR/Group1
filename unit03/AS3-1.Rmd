@@ -272,6 +272,7 @@ DateConvert[mvt$Location == "GAS STATION"] %>%
 ```{r}
 DateConvert[mvt$Location == "DRIVEWAY - RESIDENTIAL"] %>% 
   format('%w') %>% table %>% sort
+###
 ```
 
 
