@@ -1,6 +1,6 @@
 ---
 title: "AS3-3: 美國的人口統計和就業資料"
-author: "第 0 組"
+author: "第 1 組"
 date: "`r Sys.time()`"
 output: 
   html_document:
@@ -44,35 +44,43 @@ pacman::p_load(dplyr)
 <br><br>
 
 ###  Section-1 Loading and Summarizing the Dataset
+```{r}
+CPSData = read.csv("data/CPSData.csv", header = T, stringsAsFactors = F)
+CountryCodes = read.csv("data/CountryCodes.csv", header = T, stringsAsFactors = F)
+MetroAreaCodes = read.csv("data/MetroAreaCodes.csv", header = T, stringsAsFactors = F)
+```
+
 
 __§ 1.1__ How many interviewees are in the dataset?
+
+
 ```{r}
-#
-#
+# 每個觀察值皆代表一名受訪者
+nrow(CPSData)
 ```
 
 __§ 1.2__ Among the interviewees with a value reported for the Industry variable, what is the most common industry of employment? Please enter the name exactly how you see it.
 ```{r}
-#
-#
+# Educational and health services 是最多人從事的產業
+which.max(table(CPSData$Industry))
 ```
 
 __§ 1.3__ Which state has the fewest interviewees?
 ```{r}
-#
-#
+# New Mexico has the fewest interviewees
+which.min(table(CPSData$State))
 ```
 
 Which state has the largest number of interviewees?
 ```{r}
-#
-#
+#  California has the largest number of interviewees
+which.max(table(CPSData$State))
 ```
 
 __§ 1.4__ What proportion of interviewees are citizens of the United States?
 ```{r}
-#
-#
+table(CPSData$Citizenship)
+(116639+7073)/131302
 ```
 
 __§ 1.5__ For which races are there at least 250 interviewees in the CPS dataset of Hispanic ethnicity? (Select all that apply.) 
@@ -85,8 +93,8 @@ __§ 1.5__ For which races are there at least 250 interviewees in the CPS datase
 + White
 
 ```{r}
-#
-#
+# American Indian 、 Black 、Multiracial、 White
+table(CPSData$Race, CPSData$Hispanic)
 ```
 
 <br><br> 
@@ -113,8 +121,21 @@ __§ 2.1__ Which variables have at least one interviewee with a missing (NA) val
 + Industry
 
 ```{r}
-#
-#
+# MetroAreaCode、Married、Education、Industry、EmploymentStatus
+sum(is.na(CPSData$PeopleInHousehold))
+sum(is.na(CPSData$Region))
+sum(is.na(CPSData$State))
+sum(is.na(CPSData$MetroAreaCode))
+sum(is.na(CPSData$Age))
+sum(is.na(CPSData$Married))
+sum(is.na(CPSData$Sex))
+sum(is.na(CPSData$Education))
+sum(is.na(CPSData$Race))
+sum(is.na(CPSData$Hispanic))
+sum(is.na(CPSData$CountryOfBirthCode))
+sum(is.na(CPSData$Citizenship))
+sum(is.na(CPSData$EmploymentStatus))
+sum(is.na(CPSData$Industry))
 ```
 
 __§ 2.2__  Which is the most accurate:
@@ -126,39 +147,42 @@ __§ 2.2__  Which is the most accurate:
 + The Married variable being missing is not related to the Region, Sex, Age, or Citizenship value for the interviewee.
 
 ```{r}
-#
-#
+table(CPSData$Region, is.na(CPSData$Married))
+table(CPSData$Sex, is.na(CPSData$Married))
+table(CPSData$Age, is.na(CPSData$Married))
+table(CPSData$Citizenship, is.na(CPSData$Married))
+#  "The Married variable being missing is related to the Age value for the interviewee."
 ```
 
 
 __§ 2.3__ How many states had all interviewees living in a non-metropolitan area (aka they have a missing MetroAreaCode value)? For this question, treat the District of Columbia as a state (even though it is not technically a state).
 ```{r}
-#
-#
+table(CPSData$State, is.na(CPSData$MetroAreaCode))
+# Alaska, Wyoming 這兩州
 ```
 
 How many states had all interviewees living in a metropolitan area? Again, treat the District of Columbia as a state.
 ```{r}
-#
-#
+table(CPSData$State, is.na(CPSData$MetroAreaCode))
+# District of Columbia , New Jersey, Rhode Island 這三州
 ```
 
 __§ 2.4__ Which region of the United States has the largest proportion of interviewees living in a non-metropolitan area?
 ```{r}
-#
-#
+tapply(is.na(CPSData$MetroAreaCode), CPSData$Region, mean)
+#Midwest has the largest proportion of interviewees living in a non-metropolitan area
 ```
 
 __§ 2.5__ Which state has a proportion of interviewees living in a non-metropolitan area closest to 30%?
 ```{r}
-#
-#
+tapply(is.na(CPSData$MetroAreaCode), CPSData$State, mean) %>% sort
+# Wisconsin has a proportion of interviewees living in a non-metropolitan area closest to 30%
 ```
 
 Which state has the largest proportion of non-metropolitan interviewees, ignoring states where all interviewees were non-metropolitan?
 ```{r}
-#
-#
+tapply(is.na(CPSData$MetroAreaCode), CPSData$State, mean) %>% sort(decreasing = T)
+# Montana has the largest proportion of non-metropolitan interviewees, ignoring states where all interviewees were non-metropolitan
 ```
 
 <br><br> 
@@ -169,50 +193,48 @@ Which state has the largest proportion of non-metropolitan interviewees, ignorin
 
 __§ 3.1__ How many observations (codes for metropolitan areas) are there in MetroAreaMap?
 ```{r}
-#
-#
+nrow(MetroAreaCodes)
 ```
 
 How many observations (codes for countries) are there in CountryMap?
 ```{r}
-#
-#
+nrow(CountryCodes)
 ```
 
 __§ 3.2__ What is the name of the variable that was added to the data frame by the merge() operation?
 ```{r}
-#
-#
+CPS = merge(CPSData, MetroAreaCodes, by.x="MetroAreaCode", by.y="Code", all.x=TRUE)
+# 合併後會增加MetroArea這個變數            
 ```
 
 How many interviewees have a missing value for the new metropolitan area variable?
 ```{r}
-#
-#
+table(is.na(CPS$MetroArea))
+# 34238 have a missing value for the new metropolitan area variable
 ```
 
 __§ 3.3__ Which of the following metropolitan areas has the largest number of interviewees?
 ```{r}
-#
-#
+sort(table(CPS$MetroArea),decreasing = T) %>% head()
+# New York-Northern New Jersey-Long Island, NY-NJ-PA has the largest number of interviewees
 ```
 
 __§ 3.4__ Which metropolitan area has the highest proportion of interviewees of Hispanic ethnicity?
 ```{r}
-#
-#
+sort(tapply(CPS$Hispanic, CPS$MetroArea, mean),decreasing = T) %>% head()
+# Laredo, TX has the highest proportion of interviewees of Hispanic ethnicity
 ```
 
 __§ 3.5__ Determine the number of metropolitan areas in the United States from which at least 20% of interviewees are Asian.
 ```{r}
-#
-#
+sort(tapply(CPS$Race == "Asian", CPS$MetroArea, mean),decreasing = T)%>% head()
+# 4 areas in the United States from which at least 20% of interviewees are Asian.
 ```
 
 __§ 3.6__  Passing na.rm=TRUE to the tapply function, determine which metropolitan area has the smallest proportion of interviewees who have received no high school diploma.
 ```{r}
-#
-#
+sort(tapply(CPS$Education == "No high school diploma", CPS$MetroArea, mean, na.rm = TRUE)) %>% head()
+# Iowa City, IA has the smallest proportion of interviewees who have received no high school diploma.
 ```
 
 
@@ -224,44 +246,46 @@ __§ 3.6__  Passing na.rm=TRUE to the tapply function, determine which metropoli
 
 __§ 4.1__ What is the name of the variable added to the CPS data frame by this merge operation?
 ```{r}
-#
-#
+CPS = merge(CPS, CountryCodes, by.x="CountryOfBirthCode", by.y="Code", all.x=TRUE)
+# Country added to the CPS data frame by this merge operation
 ```
 
 How many interviewees have a missing value for the new metropolitan area variable?
 ```{r}
-#
-#
+table(is.na(CPS$Country))
 ```
 
 __§ 4.2__ Among all interviewees born outside of North America, which country was the most common place of birth?
 ```{r}
-#
-#
+sort(table(CPS$Country),decreasing = T) %>% head()
+# Mexico was the most common place of birth
 ```
 
 __§ 4.3__ What proportion of the interviewees from the "New York-Northern New Jersey-Long Island, NY-NJ-PA" metropolitan area have a country of birth that is not the United States? 
 ```{r}
-#
-#
+table(CPS$MetroArea == "New York-Northern New Jersey-Long Island, NY-NJ-PA", CPS$Country != "United States") 
+1668/(1668+3736)
 ```
 
 __§ 4.4__ Which metropolitan area has the largest number (note -- not proportion) of interviewees with a country of birth in India? 
 ```{r}
-#
-#
+sort(tapply(CPS$Country == "India", CPS$MetroArea, sum, na.rm=TRUE),decreasing = T) %>% head()
+# New York-Northern New Jersey-Long Island, NY-NJ-PA 
 ```
 
 In Brazil?
 ```{r}
-#
-#
+sort(tapply(CPS$Country == "Brazil", CPS$MetroArea, sum, na.rm=TRUE),decreasing = T) %>% head()
+# Boston-Cambridge-Quincy, MA-NH 
 ```
 
 In Somalia?
 ```{r}
-#
-#
+sort(tapply(CPS$Country == "Somalia", CPS$MetroArea, sum, na.rm=TRUE),decreasing = T) %>% head()
+# Minneapolis-St Paul-Bloomington, MN-WI 
 ```
 
 <br><br><br>
+=======
+
+>>>>>>> c5e6c3a5138cb8871c46c5d74c1cd6de1f4f15ea
