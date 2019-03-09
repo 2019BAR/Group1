@@ -1,0 +1,291 @@
+---
+title: "AS3-2: 股市動態"
+author: "第 1 組"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    highlight: pygments
+    theme: flatly
+    css: style.css
+---
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+# 這些程式碼設定網頁的格式，並安裝、載入一些基本的套件，請大家不要去改動<br>
+rm(list=ls(all=T))
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_knit$set(global.par = TRUE)
+par(cex=0.8)
+options(scipen=20, digits=4, width=90)
+#
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(dplyr)
+```
+<hr>
+
+**股票動態**
+
+股票市場是買賣雙方交易公司股票的地方，也是個人和公司投資的最受歡迎的方式之一。現在估計世界股票市場規模達到數兆。紐約證券交易所位於紐約市，是世界上最大的股票市場。 紐約證券交易所約有2,800家上市公司。在這個問題上，我們將看看其中五家公司的每月股價：IB、通用電氣（GE）、寶潔、可口可樂和波音。此問題中使用的數據來自Infochimps。
+
+使用`read.csv()`下載並讀取以下文件：
+
++ `data/IBMStock.csv`
++ `data/GEStock.csv`
++ `data/ProcterGambleStock.csv`
++ `data/CocaColaStock.csv`
++ `data/BoeingStock.csv` 
+
+分別存入資料框`IBM`、`GE`、`ProcterGamble`、`CocaCola`和`Boeing`，
+每個資料框都有兩個變量，描述如下：
+
+```{r}
+IBM = read.csv("data/IBMStock.csv")
+GE = read.csv("data/GEStock.csv")
+ProcterGamble = read.csv("data/ProcterGambleStock.csv")
+CocaCola = read.csv("data/CocaColaStock.csv")
+Boeing = read.csv("data/BoeingStock.csv")
+```
++ `Date`：日期
++ `StockPrice`：給定月份公司的平均股價
+
+在這個案例，我們將看看這些公司的股票動態如何隨著時間的推移而發生變化。
+
+<br><hr>
+
+
+
+###  Section-1 Summary Statistics
+```{r}
+library(lubridate)
+#載入套件(lubridate)
+```
+
+__§ 1.1__ Our five datasets all have the same number of observations. How many observations are there in each data set?
+```{r}
+dim(IBM)
+dim(GE)
+dim(ProcterGamble)
+dim(CocaCola)
+dim(Boeing)
+#使用dim找出行和列的個數
+```
+Ans: 480個
+
+
+__§ 1.2__ What is the earliest year in our datasets?
+```{r}
+#在資料集中最早的年份是?
+
+IBM$Date = as.Date(IBM$Date, "%m/%d/%y")
+GE$Date = as.Date(GE$Date, "%m/%d/%y")
+CocaCola$Date = as.Date(CocaCola$Date, "%m/%d/%y")
+ProcterGamble$Date = as.Date(ProcterGamble$Date, "%m/%d/%y")
+Boeing$Date = as.Date(Boeing$Date, "%m/%d/%y")
+#先將五間公司的時間格式整理一下
+IBM$Date[1]
+GE$Date[1]
+CocaCola$Date[1]
+ProcterGamble$Date[1]
+Boeing$Date[1]
+#找出最早的時間，這個資料的時間原本就有按照時間排序了，如果沒有應該要先排序
+
+```
+Ans: 1970年
+__§ 1.3__ What is the latest year in our datasets?
+```{r}
+IBM$Date[480]
+#在資料集中最晚的年份是?
+
+```
+Ans: 2009年
+
+__§ 1.4__ What is the mean stock price of IBM over this time period?
+```{r}
+mean(IBM$StockPrice)
+#將IBM股價取平均
+#
+```
+Ans: 144.4
+
+__§ 1.5__ What is the minimum stock price of General Electric (GE) over this time period?
+```{r}
+min(GE$StockPrice)
+#找出GE的最低股價
+#
+```
+
+Ans: 9.294
+
+__§ 1.6__ What is the maximum stock price of Coca-Cola over this time period?
+```{r}
+max(CocaCola$StockPrice)
+#找出CocaCola的最高股價
+#
+```
+Ans: 146.6
+
+__§ 1.7__ What is the median stock price of Boeing over this time period?
+```{r}
+median(Boeing$StockPrice)
+#找出Boeing股價的中位數
+#
+```
+Ans: 44.88
+
+__§ 1.8__ What is the standard deviation of the stock price of Procter & Gamble over this time period?
+```{r}
+sd(ProcterGamble$StockPrice)
+#寶潔公司股票在這段時間內的標準差是多少？
+#
+```
+Ans: 18.19
+
+<br><hr>
+
+###  Section-2 Visualizing Stock Dynamics
+
+__§ 2.1__ Around what year did Coca-Cola has its highest stock price in this time period? Around what year did Coca-Cola has its lowest stock price in this time period?
+```{r}
+CocaCola_ts = as.POSIXct(CocaCola$Date, format="%m/%d/%y")
+
+year(CocaCola_ts[which.max(CocaCola$StockPrice)])
+#找出可口可樂股價最高的年份
+
+year(CocaCola_ts[which.min(CocaCola$StockPrice)])
+#找出可口可樂股價最低的年份
+
+plot(CocaCola$Date, CocaCola$StockPrice, type="l")
+#畫出可口可樂的時間股價圖
+```
+Ans:最高是1973年，最低是1980年
+
+__§ 2.2__ In March of 2000, the technology bubble burst, and a stock market crash occurred. According to this plot, which company's stock dropped more?
+```{r}
+#2000年3月，技術泡沫破滅，股市崩盤。 根據這個情節，哪家公司的股票跌幅更大？
+
+plot(CocaCola$Date, CocaCola$StockPrice, type="l", col="Red")
+lines(ProcterGamble$Date, ProcterGamble$StockPrice, col="Blue", lty=2)
+#先以紅線畫出CocaCola股價趨勢圖，再以藍虛線畫出ProcterGamble的
+abline(v=as.Date(c("2000-03-01")), lwd=2)
+#再2000/03/01的地方畫黑線以利查看
+```
+
+Ans:寶潔公司
+
+__§ 2.3__ (a) Around 1983, the stock for one of these companies (Coca-Cola or Procter and Gamble) was going up, while the other was going down. Which one was going up? 
+```{r}
+#（a）1983年左右，其中一家公司（可口可樂或寶潔公司）的股票上漲，而另一家則下跌。 哪一個上升？
+plot(CocaCola$Date, CocaCola$StockPrice, type="l", col="Red")
+lines(ProcterGamble$Date, ProcterGamble$StockPrice, col="Blue", lty=2)
+
+abline(v=as.Date(c("1983-01-01")), lwd=2)
+#同上題，在1983/01/01的地方畫黑線以利查看趨勢
+```
+Ans:寶潔公司下降，可口可樂則上升。
+
+
+(b) In the time period shown in the plot, which stock generally has lower values?
+```{r}
+#在圖中顯示的時間段內，哪種股票的價值通常較低？
+#同上圖可以看到紅線通常比較低
+```
+Ans:可口可樂
+
+<br><hr>
+
+###  Section-3 Visualizing Stock Dynamics 1995-2005
+
+__§ 3.1__ Which stock fell the most right after the technology bubble burst in March 2000?
+```{r}
+#2000年3月科技泡沫破滅後，哪種股票跌幅最大？
+plot(CocaCola$Date[301:432], CocaCola$StockPrice[301:432], type="l",col="red", ylim=c(0,210))
+#先畫出CocaCola的在1995到2005間的股價趨勢圖，Y軸上限設定為210
+
+lines(ProcterGamble$Date[301:432], ProcterGamble$StockPrice[301:432], col="blue")
+lines(IBM$Date[301:432], IBM$StockPrice[301:432], col="green")
+lines(GE$Date[301:432], GE$StockPrice[301:432], col="orange")
+lines(Boeing$Date[301:432], Boeing$StockPrice[301:432], col="black")
+#接著分別以藍、綠、橘、黑線畫出ProcterGamble、IBM、GE、Boeing的趨勢圖
+abline(v=as.Date(c("2000-03-01")), lwd=2)
+#最後在2000/03/01的地方畫黑線以利觀察，得知GE跌幅最大
+```
+Ans: GE
+
+
+__§ 3.2__ Which stock reaches the highest value in the time period 1995-2005?
+```{r}
+#在1995-2005年期間哪種股票達到最高值？
+#直接看上圖，我們可以看到綠線(IBM)有最高值。
+```
+Ans:IBM
+
+__§ 3.3__ In October of 1997, there was a global stock market crash that was caused by an economic crisis in Asia. Comparing September 1997 to November 1997, which companies saw a decreasing trend in their stock price? (Select all that apply.)
+```{r}
+#1997年10月，全球股市崩盤是由亞洲經濟危機引發的。 比較1997年9月至1997年11月，哪些公司的股價下跌趨勢？
+plot(CocaCola$Date[301:432], CocaCola$StockPrice[301:432], type="l", col="red", ylim=c(0,210))
+lines(ProcterGamble$Date[301:432], ProcterGamble$StockPrice[301:432], col="blue")
+lines(IBM$Date[301:432], IBM$StockPrice[301:432], col="green")
+lines(GE$Date[301:432], GE$StockPrice[301:432], col="orange")
+lines(Boeing$Date[301:432], Boeing$StockPrice[301:432], col="black")
+#同上，畫出五家公司的股價趨勢圖
+abline(v=as.Date(c("1997-09-01","1997-11-01")), lwd=2)
+#然後在1997年的9月到11月間畫黑線，我們就可以看到ProcterGamble & Boeing 走下坡。
+
+```
+Ans: ProcterGamble & Boeing 
+
+__§ 3.4__ In the last two years of this time period (2004 and 2005) which stock seems to be performing the best, in terms of increasing stock price?
+```{r}
+#在這個時期（2004年和2005年）的最後兩年，哪些股票似乎表現最好，就股價上漲而言？
+plot(CocaCola$Date[301:432], CocaCola$StockPrice[301:432], type="l", col="red", ylim=c(0,210))
+lines(ProcterGamble$Date[301:432], ProcterGamble$StockPrice[301:432], col="blue")
+lines(IBM$Date[301:432], IBM$StockPrice[301:432], col="green")
+lines(GE$Date[301:432], GE$StockPrice[301:432], col="orange")
+lines(Boeing$Date[301:432], Boeing$StockPrice[301:432], col="black")
+#同上，畫出五家公司的股價趨勢圖
+abline(v=as.Date(c("2004-01-01","2005-01-01")), lwd=2)
+#然後分別在2004年和2005年畫黑線，可以看到黑線(Boeing)持續上漲。
+```
+Ans: Boeing
+
+<br><hr>
+
+
+###  Section-4 Monthly Trends
+
+__§ 4.1__ For IBM, compare the monthly averages to the overall average stock price. In which months has IBM historically had a higher stock price (on average)? Select all that apply.
+```{r}
+#對於IBM，將月平均值與總體平均股票價格進行比較。 IBM歷史上哪些月有高股票價格（平均）？ 選擇所有符合條件的。
+mean(IBM$StockPrice)
+#先求IBM股價的平均值
+tapply(IBM$StockPrice, months(IBM$Date), mean) %>% sort
+#再以月份查看股價的平均值再由小到大排序，大於平均值即是。
+```
+Ans: 一月到五月都是
+
+__§ 4.2__ General Electric and Coca-Cola both have their highest average stock price in the same month. Which month is this?
+```{r}
+#GE和CocaCola在某一個月的平均股價最高。 這是哪個月？
+mean(GE$StockPrice)
+mean(CocaCola$StockPrice)
+#先找出GE和CocaCola的平均股價
+tapply(GE$StockPrice, months(GE$Date), mean) %>% sort
+tapply(CocaCola$StockPrice, months(CocaCola$Date), mean) %>% sort
+#再以月份查看股價的平均值再由小到大排序，可以看到四月是最高的。
+```
+Ans: 四月
+
+__§ 4.3__ For the months of December and January, every company's average stock is higher in one month and lower in the other. In which month are the stock prices lower?
+```{r}
+#比較12月和1月份，每家公司的平均股價在一個月內較高而在另一個月較低。 而是哪個月股價下跌？
+tapply(GE$StockPrice, months(GE$Date), mean) %>% sort
+tapply(CocaCola$StockPrice, months(CocaCola$Date), mean) %>% sort
+tapply(Boeing$StockPrice, months(Boeing$Date), mean) %>% sort
+tapply(ProcterGamble$StockPrice, months(ProcterGamble$Date), mean) %>% sort
+tapply(IBM$StockPrice, months(IBM$Date), mean) %>% sort
+#將每家公司的每月平均股價由小到大列表，可以發現十二月都在一月的前面。
+#
+```
+Ans: 十二月
+
+<br><br><br>
+
