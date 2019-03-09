@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="第 0 組" />
+<meta name="author" content="第 1 組" />
 
 
 <title>AS3-3: 美國的人口統計和就業資料</title>
@@ -95,7 +95,7 @@ h6 {
 }
 </style>
 
-<link href="data:text/css;charset=utf-8,%0A%2Ecaption%20%7B%0Acolor%3A%20%23777%3B%0Amargin%2Dtop%3A%2010px%3B%0A%7D%0Ap%20code%20%7B%0Awhite%2Dspace%3A%20inherit%3B%0A%7D%0Apre%20%7B%0Aword%2Dbreak%3A%20normal%3B%0Aword%2Dwrap%3A%20normal%3B%0Aline%2Dheight%3A%201%3B%0A%7D%0Apre%20code%20%7B%0Awhite%2Dspace%3A%20inherit%3B%0A%7D%0Ap%2Cli%20%7B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0A%2Er%7B%0Aline%2Dheight%3A%201%2E2%3B%0A%7D%0A%2Eqiz%20%7B%0Aline%2Dheight%3A%201%2E75%3B%0Abackground%3A%20%23f0f0f0%3B%0Aborder%2Dleft%3A%2012px%20solid%20%23cce6ff%3B%0Apadding%3A%204px%3B%0Apadding%2Dleft%3A%2010px%3B%0A%7D%0A%2Ewwl%20%7B%0Aline%2Dheight%3A%201%2E75%3B%0Abackground%3A%20%23f0f0f0%3B%0Aborder%2Dleft%3A%2012px%20solid%20%23ffeb99%3B%0Apadding%3A%204px%3B%0Apadding%2Dleft%3A%2010px%3B%0A%7D%0Atitle%7B%0Acolor%3A%20%23cc0000%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Abody%7B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Ah1%2Ch2%2Ch3%2Ch4%2Ch5%7B%0Acolor%3A%20%230066ff%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Ah3%7B%0Acolor%3A%20%23008800%3B%0Abackground%3A%20%23e6ffe6%3B%0Aline%2Dheight%3A%202%3B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Ah5%7B%0Acolor%3A%20%23006000%3B%0Abackground%3A%20%23f8f8f8%3B%0Aline%2Dheight%3A%201%2E5%3B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Az%20%7Bline%2Dheight%3A%201%2E75%3B%0Acolor%3A%20%23000000%3B%0Abackground%3A%20%23ffff99%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0Apadding%3A%202px%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+<link href="data:text/css;charset=utf-8,%3C%3C%3C%3C%3C%3C%3C%20HEAD%0A%2Ecaption%20%7B%0Acolor%3A%20%23777%3B%0Amargin%2Dtop%3A%2010px%3B%0A%7D%0Ap%20code%20%7B%0Awhite%2Dspace%3A%20inherit%3B%0A%7D%0Apre%20%7B%0Aword%2Dbreak%3A%20normal%3B%0Aword%2Dwrap%3A%20normal%3B%0Aline%2Dheight%3A%201%3B%0A%7D%0Apre%20code%20%7B%0Awhite%2Dspace%3A%20inherit%3B%0A%7D%0Ap%2Cli%20%7B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0A%2Er%7B%0Aline%2Dheight%3A%201%2E2%3B%0A%7D%0A%2Eqiz%20%7B%0Aline%2Dheight%3A%201%2E75%3B%0Abackground%3A%20%23f0f0f0%3B%0Aborder%2Dleft%3A%2012px%20solid%20%23cce6ff%3B%0Apadding%3A%204px%3B%0Apadding%2Dleft%3A%2010px%3B%0A%7D%0A%2Ewwl%20%7B%0Aline%2Dheight%3A%201%2E75%3B%0Abackground%3A%20%23f0f0f0%3B%0Aborder%2Dleft%3A%2012px%20solid%20%23ffeb99%3B%0Apadding%3A%204px%3B%0Apadding%2Dleft%3A%2010px%3B%0A%7D%0Atitle%7B%0Acolor%3A%20%23cc0000%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Abody%7B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Ah1%2Ch2%2Ch3%2Ch4%2Ch5%7B%0Acolor%3A%20%230066ff%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Ah3%7B%0Acolor%3A%20%23008800%3B%0Abackground%3A%20%23e6ffe6%3B%0Aline%2Dheight%3A%202%3B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Ah5%7B%0Acolor%3A%20%23006000%3B%0Abackground%3A%20%23f8f8f8%3B%0Aline%2Dheight%3A%201%2E5%3B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Az%20%7Bline%2Dheight%3A%201%2E75%3B%0Acolor%3A%20%23000000%3B%0Abackground%3A%20%23ffff99%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0Apadding%3A%202px%3B%0A%7D%0A%3D%3D%3D%3D%3D%3D%3D%0A%2Ecaption%20%7B%0Acolor%3A%20%23777%3B%0Amargin%2Dtop%3A%2010px%3B%0A%7D%0Ap%20code%20%7B%0Awhite%2Dspace%3A%20inherit%3B%0A%7D%0Apre%20%7B%0Aword%2Dbreak%3A%20normal%3B%0Aword%2Dwrap%3A%20normal%3B%0Aline%2Dheight%3A%201%3B%0A%7D%0Apre%20code%20%7B%0Awhite%2Dspace%3A%20inherit%3B%0A%7D%0Ap%2Cli%20%7B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0A%2Er%7B%0Aline%2Dheight%3A%201%2E2%3B%0A%7D%0A%2Eqiz%20%7B%0Aline%2Dheight%3A%201%2E75%3B%0Abackground%3A%20%23f0f0f0%3B%0Aborder%2Dleft%3A%2012px%20solid%20%23cce6ff%3B%0Apadding%3A%204px%3B%0Apadding%2Dleft%3A%2010px%3B%0A%7D%0A%2Ewwl%20%7B%0Aline%2Dheight%3A%201%2E75%3B%0Abackground%3A%20%23f0f0f0%3B%0Aborder%2Dleft%3A%2012px%20solid%20%23ffeb99%3B%0Apadding%3A%204px%3B%0Apadding%2Dleft%3A%2010px%3B%0A%7D%0Atitle%7B%0Acolor%3A%20%23cc0000%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Abody%7B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Ah1%2Ch2%2Ch3%2Ch4%2Ch5%7B%0Acolor%3A%20%230066ff%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22Consolas%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0A%7D%0Ah3%7B%0Acolor%3A%20%23008800%3B%0Abackground%3A%20%23e6ffe6%3B%0Aline%2Dheight%3A%202%3B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Ah5%7B%0Acolor%3A%20%23006000%3B%0Abackground%3A%20%23f8f8f8%3B%0Aline%2Dheight%3A%201%2E5%3B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Az%20%7Bline%2Dheight%3A%201%2E75%3B%0Acolor%3A%20%23000000%3B%0Abackground%3A%20%23ffff99%3B%0Afont%2Dfamily%3A%20%22Trebuchet%20MS%22%2C%20%22%E5%BE%AE%E8%BB%9F%E6%AD%A3%E9%BB%91%E9%AB%94%22%2C%20%22Microsoft%20JhengHei%22%3B%0Apadding%3A%202px%3B%0A%7D%0A%3E%3E%3E%3E%3E%3E%3E%20c5e6c3a5138cb8871c46c5d74c1cd6de1f4f15ea%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -117,6 +117,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -146,8 +149,8 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">AS3-3: 美國的人口統計和就業資料</h1>
-<h4 class="author"><em>第 0 組</em></h4>
-<h4 class="date"><em>2019-03-05 22:01:34</em></h4>
+<h4 class="author"><em>第 1 組</em></h4>
+<h4 class="date"><em>2019-03-08 22:24:55</em></h4>
 
 </div>
 
@@ -174,21 +177,35 @@ $(document).ready(function () {
 <p><br><br></p>
 <div id="section-1-loading-and-summarizing-the-dataset" class="section level3">
 <h3>Section-1 Loading and Summarizing the Dataset</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">CPSData =<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/CPSData.csv&quot;</span>, <span class="dt">header =</span> T, <span class="dt">stringsAsFactors =</span> F)
+CountryCodes =<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/CountryCodes.csv&quot;</span>, <span class="dt">header =</span> T, <span class="dt">stringsAsFactors =</span> F)
+MetroAreaCodes =<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/MetroAreaCodes.csv&quot;</span>, <span class="dt">header =</span> T, <span class="dt">stringsAsFactors =</span> F)</code></pre></div>
 <p><strong>§ 1.1</strong> How many interviewees are in the dataset?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># 每個觀察值皆代表一名受訪者</span>
+<span class="kw">nrow</span>(CPSData)</code></pre></div>
+<pre><code>[1] 131302</code></pre>
 <p><strong>§ 1.2</strong> Among the interviewees with a value reported for the Industry variable, what is the most common industry of employment? Please enter the name exactly how you see it.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Educational and health services 是最多人從事的產業</span>
+<span class="kw">which.max</span>(<span class="kw">table</span>(CPSData<span class="op">$</span>Industry))</code></pre></div>
+<pre><code>Educational and health services 
+                              4 </code></pre>
 <p><strong>§ 1.3</strong> Which state has the fewest interviewees?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># New Mexico has the fewest interviewees</span>
+<span class="kw">which.min</span>(<span class="kw">table</span>(CPSData<span class="op">$</span>State))</code></pre></div>
+<pre><code>New Mexico 
+        32 </code></pre>
 <p>Which state has the largest number of interviewees?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#  California has the largest number of interviewees</span>
+<span class="kw">which.max</span>(<span class="kw">table</span>(CPSData<span class="op">$</span>State))</code></pre></div>
+<pre><code>California 
+         5 </code></pre>
 <p><strong>§ 1.4</strong> What proportion of interviewees are citizens of the United States?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPSData<span class="op">$</span>Citizenship)</code></pre></div>
+<pre><code>
+     Citizen, Native Citizen, Naturalized          Non-Citizen 
+              116639                 7073                 7590 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(<span class="dv">116639</span><span class="op">+</span><span class="dv">7073</span>)<span class="op">/</span><span class="dv">131302</span></code></pre></div>
+<pre><code>[1] 0.9422</code></pre>
 <p><strong>§ 1.5</strong> For which races are there at least 250 interviewees in the CPS dataset of Hispanic ethnicity? (Select all that apply.)</p>
 <ul>
 <li>American Indian</li>
@@ -198,8 +215,16 @@ $(document).ready(function () {
 <li>Pacific Islander</li>
 <li>White</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># American Indian 、 Black 、Multiracial、 White</span>
+<span class="kw">table</span>(CPSData<span class="op">$</span>Race, CPSData<span class="op">$</span>Hispanic)</code></pre></div>
+<pre><code>                  
+                       0     1
+  American Indian   1129   304
+  Asian             6407   113
+  Black            13292   621
+  Multiracial       2449   448
+  Pacific Islander   541    77
+  White            89190 16731</code></pre>
 <p><br><br></p>
 <hr />
 </div>
@@ -222,8 +247,35 @@ $(document).ready(function () {
 <li>EmploymentStatus</li>
 <li>Industry</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># MetroAreaCode、Married、Education、Industry、EmploymentStatus</span>
+<span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>PeopleInHousehold))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Region))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>State))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>MetroAreaCode))</code></pre></div>
+<pre><code>[1] 34238</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Age))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Married))</code></pre></div>
+<pre><code>[1] 25338</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Sex))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Education))</code></pre></div>
+<pre><code>[1] 25338</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Race))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Hispanic))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>CountryOfBirthCode))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Citizenship))</code></pre></div>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>EmploymentStatus))</code></pre></div>
+<pre><code>[1] 25789</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>Industry))</code></pre></div>
+<pre><code>[1] 65060</code></pre>
 <p><strong>§ 2.2</strong> Which is the most accurate:</p>
 <ul>
 <li>The Married variable being missing is related to the Region value for the interviewee.</li>
@@ -232,79 +284,428 @@ $(document).ready(function () {
 <li>The Married variable being missing is related to the Citizenship value for the interviewee.</li>
 <li>The Married variable being missing is not related to the Region, Sex, Age, or Citizenship value for the interviewee.</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPSData<span class="op">$</span>Region, <span class="kw">is.na</span>(CPSData<span class="op">$</span>Married))</code></pre></div>
+<pre><code>           
+            FALSE  TRUE
+  Midwest   24609  6075
+  Northeast 21432  4507
+  South     33535  7967
+  West      26388  6789</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPSData<span class="op">$</span>Sex, <span class="kw">is.na</span>(CPSData<span class="op">$</span>Married))</code></pre></div>
+<pre><code>        
+         FALSE  TRUE
+  Female 55264 12217
+  Male   50700 13121</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPSData<span class="op">$</span>Age, <span class="kw">is.na</span>(CPSData<span class="op">$</span>Married))</code></pre></div>
+<pre><code>    
+     FALSE TRUE
+  0      0 1283
+  1      0 1559
+  2      0 1574
+  3      0 1693
+  4      0 1695
+  5      0 1795
+  6      0 1721
+  7      0 1681
+  8      0 1729
+  9      0 1748
+  10     0 1750
+  11     0 1721
+  12     0 1797
+  13     0 1802
+  14     0 1790
+  15  1795    0
+  16  1751    0
+  17  1764    0
+  18  1596    0
+  19  1517    0
+  20  1398    0
+  21  1525    0
+  22  1536    0
+  23  1638    0
+  24  1627    0
+  25  1604    0
+  26  1643    0
+  27  1657    0
+  28  1736    0
+  29  1645    0
+  30  1854    0
+  31  1762    0
+  32  1790    0
+  33  1804    0
+  34  1653    0
+  35  1716    0
+  36  1663    0
+  37  1531    0
+  38  1530    0
+  39  1542    0
+  40  1571    0
+  41  1673    0
+  42  1711    0
+  43  1819    0
+  44  1764    0
+  45  1749    0
+  46  1665    0
+  47  1647    0
+  48  1791    0
+  49  1989    0
+  50  1966    0
+  51  1931    0
+  52  1935    0
+  53  1994    0
+  54  1912    0
+  55  1895    0
+  56  1935    0
+  57  1827    0
+  58  1874    0
+  59  1758    0
+  60  1746    0
+  61  1735    0
+  62  1595    0
+  63  1596    0
+  64  1519    0
+  65  1569    0
+  66  1577    0
+  67  1227    0
+  68  1130    0
+  69  1062    0
+  70  1195    0
+  71  1031    0
+  72   941    0
+  73   896    0
+  74   842    0
+  75   763    0
+  76   729    0
+  77   698    0
+  78   659    0
+  79   661    0
+  80  2664    0
+  85  2446    0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPSData<span class="op">$</span>Citizenship, <span class="kw">is.na</span>(CPSData<span class="op">$</span>Married))</code></pre></div>
+<pre><code>                      
+                       FALSE  TRUE
+  Citizen, Native      91956 24683
+  Citizen, Naturalized  6910   163
+  Non-Citizen           7098   492</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#  &quot;The Married variable being missing is related to the Age value for the interviewee.&quot;</span></code></pre></div>
 <p><strong>§ 2.3</strong> How many states had all interviewees living in a non-metropolitan area (aka they have a missing MetroAreaCode value)? For this question, treat the District of Columbia as a state (even though it is not technically a state).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPSData<span class="op">$</span>State, <span class="kw">is.na</span>(CPSData<span class="op">$</span>MetroAreaCode))</code></pre></div>
+<pre><code>                      
+                       FALSE  TRUE
+  Alabama               1020   356
+  Alaska                   0  1590
+  Arizona               1327   201
+  Arkansas               724   697
+  California           11333   237
+  Colorado              2545   380
+  Connecticut           2593   243
+  Delaware              1696   518
+  District of Columbia  1791     0
+  Florida               4947   202
+  Georgia               2250   557
+  Hawaii                1576   523
+  Idaho                  761   757
+  Illinois              3473   439
+  Indiana               1420   584
+  Iowa                  1297  1231
+  Kansas                1234   701
+  Kentucky               908   933
+  Louisiana             1216   234
+  Maine                  909  1354
+  Maryland              2978   222
+  Massachusetts         1858   129
+  Michigan              2517   546
+  Minnesota             2150   989
+  Mississippi            376   854
+  Missouri              1440   705
+  Montana                199  1015
+  Nebraska               816  1133
+  Nevada                1609   247
+  New Hampshire         1148  1514
+  New Jersey            2567     0
+  New Mexico             832   270
+  New York              5144   451
+  North Carolina        1642   977
+  North Dakota           432  1213
+  Ohio                  2754   924
+  Oklahoma              1024   499
+  Oregon                1519   424
+  Pennsylvania          3245   685
+  Rhode Island          2209     0
+  South Carolina        1139   519
+  South Dakota           595  1405
+  Tennessee             1149   635
+  Texas                 6060  1017
+  Utah                  1455   387
+  Vermont                657  1233
+  Virginia              2367   586
+  Washington            1937   429
+  West Virginia          344  1065
+  Wisconsin             1882   804
+  Wyoming                  0  1624</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Alaska, Wyoming 這兩州</span></code></pre></div>
 <p>How many states had all interviewees living in a metropolitan area? Again, treat the District of Columbia as a state.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPSData<span class="op">$</span>State, <span class="kw">is.na</span>(CPSData<span class="op">$</span>MetroAreaCode))</code></pre></div>
+<pre><code>                      
+                       FALSE  TRUE
+  Alabama               1020   356
+  Alaska                   0  1590
+  Arizona               1327   201
+  Arkansas               724   697
+  California           11333   237
+  Colorado              2545   380
+  Connecticut           2593   243
+  Delaware              1696   518
+  District of Columbia  1791     0
+  Florida               4947   202
+  Georgia               2250   557
+  Hawaii                1576   523
+  Idaho                  761   757
+  Illinois              3473   439
+  Indiana               1420   584
+  Iowa                  1297  1231
+  Kansas                1234   701
+  Kentucky               908   933
+  Louisiana             1216   234
+  Maine                  909  1354
+  Maryland              2978   222
+  Massachusetts         1858   129
+  Michigan              2517   546
+  Minnesota             2150   989
+  Mississippi            376   854
+  Missouri              1440   705
+  Montana                199  1015
+  Nebraska               816  1133
+  Nevada                1609   247
+  New Hampshire         1148  1514
+  New Jersey            2567     0
+  New Mexico             832   270
+  New York              5144   451
+  North Carolina        1642   977
+  North Dakota           432  1213
+  Ohio                  2754   924
+  Oklahoma              1024   499
+  Oregon                1519   424
+  Pennsylvania          3245   685
+  Rhode Island          2209     0
+  South Carolina        1139   519
+  South Dakota           595  1405
+  Tennessee             1149   635
+  Texas                 6060  1017
+  Utah                  1455   387
+  Vermont                657  1233
+  Virginia              2367   586
+  Washington            1937   429
+  West Virginia          344  1065
+  Wisconsin             1882   804
+  Wyoming                  0  1624</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># District of Columbia , New Jersey, Rhode Island 這三州</span></code></pre></div>
 <p><strong>§ 2.4</strong> Which region of the United States has the largest proportion of interviewees living in a non-metropolitan area?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tapply</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>MetroAreaCode), CPSData<span class="op">$</span>Region, mean)</code></pre></div>
+<pre><code>  Midwest Northeast     South      West 
+   0.3479    0.2162    0.2378    0.2437 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Midwest has the largest proportion of interviewees living in a non-metropolitan area</span></code></pre></div>
 <p><strong>§ 2.5</strong> Which state has a proportion of interviewees living in a non-metropolitan area closest to 30%?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tapply</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>MetroAreaCode), CPSData<span class="op">$</span>State, mean) <span class="op">%&gt;%</span><span class="st"> </span>sort</code></pre></div>
+<pre><code>District of Columbia           New Jersey         Rhode Island           California 
+             0.00000              0.00000              0.00000              0.02048 
+             Florida        Massachusetts             Maryland             New York 
+             0.03923              0.06492              0.06938              0.08061 
+         Connecticut             Illinois             Colorado              Arizona 
+             0.08568              0.11222              0.12991              0.13154 
+              Nevada                Texas            Louisiana         Pennsylvania 
+             0.13308              0.14370              0.16138              0.17430 
+            Michigan           Washington              Georgia             Virginia 
+             0.17826              0.18132              0.19843              0.19844 
+                Utah               Oregon             Delaware           New Mexico 
+             0.21010              0.21822              0.23397              0.24501 
+              Hawaii                 Ohio              Alabama              Indiana 
+             0.24917              0.25122              0.25872              0.29142 
+           Wisconsin       South Carolina            Minnesota             Oklahoma 
+             0.29933              0.31303              0.31507              0.32764 
+            Missouri            Tennessee               Kansas       North Carolina 
+             0.32867              0.35594              0.36227              0.37304 
+                Iowa             Arkansas                Idaho             Kentucky 
+             0.48695              0.49050              0.49868              0.50679 
+       New Hampshire             Nebraska                Maine              Vermont 
+             0.56875              0.58132              0.59832              0.65238 
+         Mississippi         South Dakota         North Dakota        West Virginia 
+             0.69431              0.70250              0.73739              0.75586 
+             Montana               Alaska              Wyoming 
+             0.83608              1.00000              1.00000 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Wisconsin has a proportion of interviewees living in a non-metropolitan area closest to 30%</span></code></pre></div>
 <p>Which state has the largest proportion of non-metropolitan interviewees, ignoring states where all interviewees were non-metropolitan?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tapply</span>(<span class="kw">is.na</span>(CPSData<span class="op">$</span>MetroAreaCode), CPSData<span class="op">$</span>State, mean) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sort</span>(<span class="dt">decreasing =</span> T)</code></pre></div>
+<pre><code>              Alaska              Wyoming              Montana        West Virginia 
+             1.00000              1.00000              0.83608              0.75586 
+        North Dakota         South Dakota          Mississippi              Vermont 
+             0.73739              0.70250              0.69431              0.65238 
+               Maine             Nebraska        New Hampshire             Kentucky 
+             0.59832              0.58132              0.56875              0.50679 
+               Idaho             Arkansas                 Iowa       North Carolina 
+             0.49868              0.49050              0.48695              0.37304 
+              Kansas            Tennessee             Missouri             Oklahoma 
+             0.36227              0.35594              0.32867              0.32764 
+           Minnesota       South Carolina            Wisconsin              Indiana 
+             0.31507              0.31303              0.29933              0.29142 
+             Alabama                 Ohio               Hawaii           New Mexico 
+             0.25872              0.25122              0.24917              0.24501 
+            Delaware               Oregon                 Utah             Virginia 
+             0.23397              0.21822              0.21010              0.19844 
+             Georgia           Washington             Michigan         Pennsylvania 
+             0.19843              0.18132              0.17826              0.17430 
+           Louisiana                Texas               Nevada              Arizona 
+             0.16138              0.14370              0.13308              0.13154 
+            Colorado             Illinois          Connecticut             New York 
+             0.12991              0.11222              0.08568              0.08061 
+            Maryland        Massachusetts              Florida           California 
+             0.06938              0.06492              0.03923              0.02048 
+District of Columbia           New Jersey         Rhode Island 
+             0.00000              0.00000              0.00000 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Montana has the largest proportion of non-metropolitan interviewees, ignoring states where all interviewees were non-metropolitan</span></code></pre></div>
 <p><br><br></p>
 <hr />
 </div>
 <div id="section-3-integrating-metropolitan-area-data" class="section level3">
 <h3>Section-3 Integrating Metropolitan Area Data</h3>
 <p><strong>§ 3.1</strong> How many observations (codes for metropolitan areas) are there in MetroAreaMap?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">nrow</span>(MetroAreaCodes)</code></pre></div>
+<pre><code>[1] 271</code></pre>
 <p>How many observations (codes for countries) are there in CountryMap?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">nrow</span>(CountryCodes)</code></pre></div>
+<pre><code>[1] 149</code></pre>
 <p><strong>§ 3.2</strong> What is the name of the variable that was added to the data frame by the merge() operation?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">CPS =<span class="st"> </span><span class="kw">merge</span>(CPSData, MetroAreaCodes, <span class="dt">by.x=</span><span class="st">&quot;MetroAreaCode&quot;</span>, <span class="dt">by.y=</span><span class="st">&quot;Code&quot;</span>, <span class="dt">all.x=</span><span class="ot">TRUE</span>)
+<span class="co"># 合併後會增加MetroArea這個變數            </span></code></pre></div>
 <p>How many interviewees have a missing value for the new metropolitan area variable?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">is.na</span>(CPS<span class="op">$</span>MetroArea))</code></pre></div>
+<pre><code>
+FALSE  TRUE 
+97064 34238 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># 34238 have a missing value for the new metropolitan area variable</span></code></pre></div>
 <p><strong>§ 3.3</strong> Which of the following metropolitan areas has the largest number of interviewees?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">table</span>(CPS<span class="op">$</span>MetroArea),<span class="dt">decreasing =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>
+New York-Northern New Jersey-Long Island, NY-NJ-PA 
+                                              5409 
+      Washington-Arlington-Alexandria, DC-VA-MD-WV 
+                                              4177 
+              Los Angeles-Long Beach-Santa Ana, CA 
+                                              4102 
+          Philadelphia-Camden-Wilmington, PA-NJ-DE 
+                                              2855 
+               Chicago-Naperville-Joliet, IN-IN-WI 
+                                              2772 
+              Providence-Fall River-Warwick, MA-RI 
+                                              2284 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># New York-Northern New Jersey-Long Island, NY-NJ-PA has the largest number of interviewees</span></code></pre></div>
 <p><strong>§ 3.4</strong> Which metropolitan area has the highest proportion of interviewees of Hispanic ethnicity?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">tapply</span>(CPS<span class="op">$</span>Hispanic, CPS<span class="op">$</span>MetroArea, mean),<span class="dt">decreasing =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>                Laredo, TX McAllen-Edinburg-Pharr, TX  Brownsville-Harlingen, TX 
+                    0.9663                     0.9487                     0.7975 
+               El Paso, TX              El Centro, CA            San Antonio, TX 
+                    0.7910                     0.6869                     0.6442 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Laredo, TX has the highest proportion of interviewees of Hispanic ethnicity</span></code></pre></div>
 <p><strong>§ 3.5</strong> Determine the number of metropolitan areas in the United States from which at least 20% of interviewees are Asian.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">tapply</span>(CPS<span class="op">$</span>Race <span class="op">==</span><span class="st"> &quot;Asian&quot;</span>, CPS<span class="op">$</span>MetroArea, mean),<span class="dt">decreasing =</span> T)<span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>                      Honolulu, HI  San Francisco-Oakland-Fremont, CA 
+                            0.5019                             0.2468 
+San Jose-Sunnyvale-Santa Clara, CA              Vallejo-Fairfield, CA 
+                            0.2418                             0.2030 
+                        Fresno, CA                  Warner Robins, GA 
+                            0.1848                             0.1667 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># 4 areas in the United States from which at least 20% of interviewees are Asian.</span></code></pre></div>
 <p><strong>§ 3.6</strong> Passing na.rm=TRUE to the tapply function, determine which metropolitan area has the smallest proportion of interviewees who have received no high school diploma.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">tapply</span>(CPS<span class="op">$</span>Education <span class="op">==</span><span class="st"> &quot;No high school diploma&quot;</span>, CPS<span class="op">$</span>MetroArea, mean, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>           Iowa City, IA        Bowling Green, KY    Kalamazoo-Portage, MI 
+                 0.02913                  0.03704                  0.05051 
+    Champaign-Urbana, IL Bremerton-Silverdale, WA             Lawrence, KS 
+                 0.05155                  0.05405                  0.05952 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Iowa City, IA has the smallest proportion of interviewees who have received no high school diploma.</span></code></pre></div>
 <p><br><br></p>
 <hr />
 </div>
 <div id="section-4-integrating-country-of-birth-data" class="section level3">
 <h3>Section-4 Integrating Country of Birth Data</h3>
 <p><strong>§ 4.1</strong> What is the name of the variable added to the CPS data frame by this merge operation?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">CPS =<span class="st"> </span><span class="kw">merge</span>(CPS, CountryCodes, <span class="dt">by.x=</span><span class="st">&quot;CountryOfBirthCode&quot;</span>, <span class="dt">by.y=</span><span class="st">&quot;Code&quot;</span>, <span class="dt">all.x=</span><span class="ot">TRUE</span>)
+<span class="co"># Country added to the CPS data frame by this merge operation</span></code></pre></div>
 <p>How many interviewees have a missing value for the new metropolitan area variable?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">is.na</span>(CPS<span class="op">$</span>Country))</code></pre></div>
+<pre><code>
+ FALSE   TRUE 
+131126    176 </code></pre>
 <p><strong>§ 4.2</strong> Among all interviewees born outside of North America, which country was the most common place of birth?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">table</span>(CPS<span class="op">$</span>Country),<span class="dt">decreasing =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>
+United States        Mexico   Philippines         India         China   Puerto Rico 
+       115063          3921           839           770           581           518 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Mexico was the most common place of birth</span></code></pre></div>
 <p><strong>§ 4.3</strong> What proportion of the interviewees from the “New York-Northern New Jersey-Long Island, NY-NJ-PA” metropolitan area have a country of birth that is not the United States?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(CPS<span class="op">$</span>MetroArea <span class="op">==</span><span class="st"> &quot;New York-Northern New Jersey-Long Island, NY-NJ-PA&quot;</span>, CPS<span class="op">$</span>Country <span class="op">!=</span><span class="st"> &quot;United States&quot;</span>) </code></pre></div>
+<pre><code>       
+        FALSE  TRUE
+  FALSE 78757 12744
+  TRUE   3736  1668</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1668</span><span class="op">/</span>(<span class="dv">1668</span><span class="op">+</span><span class="dv">3736</span>)</code></pre></div>
+<pre><code>[1] 0.3087</code></pre>
 <p><strong>§ 4.4</strong> Which metropolitan area has the largest number (note – not proportion) of interviewees with a country of birth in India?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">tapply</span>(CPS<span class="op">$</span>Country <span class="op">==</span><span class="st"> &quot;India&quot;</span>, CPS<span class="op">$</span>MetroArea, sum, <span class="dt">na.rm=</span><span class="ot">TRUE</span>),<span class="dt">decreasing =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>New York-Northern New Jersey-Long Island, NY-NJ-PA 
+                                                96 
+      Washington-Arlington-Alexandria, DC-VA-MD-WV 
+                                                50 
+          Philadelphia-Camden-Wilmington, PA-NJ-DE 
+                                                32 
+               Chicago-Naperville-Joliet, IN-IN-WI 
+                                                31 
+                        Detroit-Warren-Livonia, MI 
+                                                30 
+                Atlanta-Sandy Springs-Marietta, GA 
+                                                27 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># New York-Northern New Jersey-Long Island, NY-NJ-PA </span></code></pre></div>
 <p>In Brazil?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">tapply</span>(CPS<span class="op">$</span>Country <span class="op">==</span><span class="st"> &quot;Brazil&quot;</span>, CPS<span class="op">$</span>MetroArea, sum, <span class="dt">na.rm=</span><span class="ot">TRUE</span>),<span class="dt">decreasing =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>                    Boston-Cambridge-Quincy, MA-NH 
+                                                18 
+             Miami-Fort Lauderdale-Miami Beach, FL 
+                                                16 
+              Los Angeles-Long Beach-Santa Ana, CA 
+                                                 9 
+      Washington-Arlington-Alexandria, DC-VA-MD-WV 
+                                                 8 
+                   Bridgeport-Stamford-Norwalk, CT 
+                                                 7 
+New York-Northern New Jersey-Long Island, NY-NJ-PA 
+                                                 7 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Boston-Cambridge-Quincy, MA-NH </span></code></pre></div>
 <p>In Somalia?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#</span>
-<span class="co">#</span></code></pre></div>
-<p><br><br><br></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">tapply</span>(CPS<span class="op">$</span>Country <span class="op">==</span><span class="st"> &quot;Somalia&quot;</span>, CPS<span class="op">$</span>MetroArea, sum, <span class="dt">na.rm=</span><span class="ot">TRUE</span>),<span class="dt">decreasing =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>Minneapolis-St Paul-Bloomington, MN-WI            Phoenix-Mesa-Scottsdale, AZ 
+                                    17                                      7 
+           Seattle-Tacoma-Bellevue, WA                          St. Cloud, MN 
+                                     7                                      7 
+                          Columbus, OH                           Fargo, ND-MN 
+                                     5                                      5 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Minneapolis-St Paul-Bloomington, MN-WI </span></code></pre></div>
+</div>
+<div id="section" class="section level1">
+<h1><br><br><br></h1>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>c5e6c3a5138cb8871c46c5d74c1cd6de1f4f15ea</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
 </div>
 
 
