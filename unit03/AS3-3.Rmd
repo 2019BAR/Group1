@@ -68,6 +68,7 @@ which.max(table(CPSData$Industry))
 __§ 1.3__ Which state has the fewest interviewees?
 ```{r}
 which.min(table(CPSData$State))
+# New Mexico has the fewest interviewees
 ```
 
 Which state has the largest number of interviewees?
