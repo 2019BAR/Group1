@@ -1,0 +1,385 @@
+---
+title: 第六單元：基礎統計 with R
+author: 中山大學管理學院 卓雍然
+date: "`r Sys.time()`"
+output: 
+  html_document:
+    highlight: pygments
+    theme: flatly
+    css: style.css
+---
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=F}
+# 這些程式碼設定網頁的格式，並安裝、載入一些基本的套件，請大家不要去改動<br>
+rm(list=ls(all=T))
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_knit$set(global.par = TRUE)
+par(cex=0.8)
+options(scipen=20, digits=5, width=80)
+if(!require(pacman)) install.packages("pacman")
+```
+<hr>
+
+**單元摘要：**使用R複習並練習操作「基礎統計」
+
+* 統計量 Statistics
+    + 基本的統計量(函數)
+* R內建的機率分布與其功能函數 
+    + 機率分布與功能函數 
+* 常見的連續的機率分布 Continuous Probability Distributions
+    + 常態分布 Normal Distributions
+    + 卡方分布 Chi-Square Distribution
+    + F分布 F Distribution
+    + Student-$t$ Distribution
+    + Uniform Distribution
+* 常見的離散的機率分布 Discrete Probability Distributions
+    + 二項分布 Binomial Dist.
+    + 超幾何分布 Hypergeometric Dist.
+    + 布瓦松分布 Poisson Dist.
+    + 幾何分布 Geometric Dist.
+    + 負二項分布 Negative Binominal Dist.
+    + 多項分布 Multinomial Dist.
+* 實證分布應用案例
+    + 老忠實資料集
+* 理論分布的實證應用案例
+    + Applications of Poisson Dist.
+
+<br>
+```{r results='hide', message=FALSE, warning=FALSE}
+pacman::p_load(magrittr, vcd)
+```
+<hr>
+
+### 【A】統計量 Statistics
+
+統計量(statistics)就是一群數值的摘要(summary)，常用的統計量有：<br>
+
+* 平均值 Mean：`mean()`
+* 中位數：`median()`
+* 最大值：`max()`
+* 最小值：`min()`
+* 標準差 Std. Deviation：`sd()` 平均誤差 
+* 變異數 Variance：`var()`      平均誤差的平方
+* 百分位：`quantile()`
+
+<span style="font-size:24px">`r "\U1F9D9"`</span> : 在標準差和變異數的定義裡面，所謂誤差是指對什麼的誤差呢？<br><br>
+
+我們先隨機在0到100之間產生50個的亂數 
+```{r}
+X = runif(50, 0, 100)
+X
+```
+
+```{r}
+summary(X)           # 基本統計量
+```
+
+```{r}
+c(sd(X), var(X))     # 標準差、變異數
+```
+
+```{r}
+quantile(X, seq(0,1,1/10))  # 百分位數
+```
+
+除了這些統計量之外，我們也可以利用圖形來幫助我們(對於這一群數字)建立一個整體性的認識，直方圖可以顯示變數的值所出現的頻率(次數)或機率(密度)
+```{r fig.height=2.8, fig.width=7.2}
+par(mfrow=c(1,2), cex=0.8)
+hist(X, 10, col='aliceblue', border='lightgray')         # frquency
+hist(X, 10, col='aliceblue', border='lightgray', freq=F) # density
+```
+<br><hr>
+
+### 【B】R內建的機率分布與其功能函數
+R有一群內建的機率分布 
+
+* beta : `dbeta()`
+* binomial : `dbinom()`
+* Cauchy : `dcauchy()`
+* chi-squared : `dchisq()`
+* exponential : `dexp()`
+* F : `df()`
+* gamma : `dgamma()`
+* geometric : `dgeom
+* hypergeometric : `dhyper()`
+* log-normal : `dlnorm()`
+* multinomial : `dmultinom()`
+* negative binomial : `dnbinom()`
+* normal : `dnorm()`
+* Poisson : `dpois()`
+* Student's t : `dt()`
+* uniform : `dunif()`
+* Weibull : `dweibull()`
+* ...其他幾乎所有叫得出名字的機率分布都可以透過套件外掛
+
+```{r eval=F}
+?distributions
+```
+
+每一種機率分布都有四個功能函數：
+
+* `d<name>()` : density or probability function
+* `p<name>()` : cumulative density function
+* `q<name>()` : quantile function
+* `r<name>()` : random sampling
+
+##### B1. 機率分布的參數
+```{r fig.height=3, fig.width=8}
+par(mfrow=c(2,3), mar=c(2,4,3,2), cex=0.6)
+for(n in c(10, 20)) for(p in c(0.2, 0.5, 0.8)) 
+  dbinom(0:n, n, p) %>% 
+  barplot(names=0:n, main=sprintf("Binom[n=%d, p=%.1f]", n, p), las=2)
+```
+<br><br>
+
+##### B2. `d<name>: d for density` 機率密度函數 (PDF) 
+`d<name>`用來求取對應到某一數值的機率密度，
+給定機率分佈的種類和它所需要的「參數」，我們就能確定「值域」之中每一點的機率密度；
+`d<name>`通常用來畫機率密度函數
+```{r fig.height=5, fig.width=8}
+par(mfrow=c(2,2), mar=c(2,4,3,2), cex=0.7)
+curve(dnorm(x,mean=50,sd=15),0,100,main="Normal")
+curve(dunif(x,min=0,max=100),0,100,main="Uniform")
+curve(dlnorm(x,meanlog=log(50),sdlog=1.5),0,100,main="Log-Normal")
+curve(dexp(x,rate=0.05),0,100,main="Exponential")
+```
+<br>
+
+傳回`Normal[mean=40,sd=15]`這個機率密度函數在`x = 40`這一點的值
+```{r}
+dnorm(x=40, mean=50, sd=15)
+```
+
+傳回`Normal[mean=40,sd=15]`這個機率密度函數在`x = c(0,20,40,60,80,100)`這些點的值
+```{r}
+dnorm(seq(0,100,20), mean=50, sd=15)
+```
+
+畫出機率分布的形狀
+```{r fig.height=2, fig.width=8}
+par(mfrow=c(1,2), mar=c(2,2,1,2),cex=0.7)
+x = seq(0,100,1)
+y = dnorm(x, mean=50, sd=15) 
+plot(x, y, type='l')
+# curve() is a easier way to plot a function (or expresion) of x
+curve(dnorm(x,mean=50,sd=15),0,100)
+```
+<br><br>
+
+##### B3. `r<name>: r for random` 隨機抽樣 
+`r<name>`常用來從給定的機率分佈之中隨機抽出樣本
+```{r}
+norm50 = rnorm(n=50, mean=50, sd=10)
+unif50 = runif(n=50, min=0, max=100)
+```
+
+```{r fig.height=2, fig.width=8}
+par(mfrow=c(1,2), mar=c(2,2,2,2),cex=0.6)
+hist(norm50,breaks=10)
+hist(unif50,breaks=10)
+```
+
+```{r fig.height=6, fig.width=8}
+par(mfrow=c(3,2), mar=c(3,2,2,2),cex=0.6)
+for(n in c(20, 200, 2000)) {
+  hist(rnorm(n, mean=50, sd=10),breaks=10,main=paste("Normal",n))
+  hist(runif(n, min=0, max=100),breaks=10,main=paste("Uniform",n))
+  }
+```
+<br><br>
+
+##### B4. `p<name>: p for probability` 累積機率函數 (CDF)
+`p<name>`求取變數落在某數值區間的機率，給定機率分佈，我們常會想要知道目標變數會落在某一個數值空間的機率，如果隨機變數`X ~ Normal[mu=50, sd=10]`，`pnorm(x=55, 50, 10)`會傳回`X < 55`的機率；
+```{r}
+mu=50; sd=10
+pnorm(55, mu, sd)
+```
+
+<p class="qiz">
+<span style="font-size:24px">`r "\U1F5FF"` 問題討論：</span><br>
+A. 如果隨機變數`X ~ Normal[mu=100, sd=20]`，請求出以下機率： <br>
+&emsp; ■ `P[X < 110]`<br>
+&emsp; ■ `P[130 > X > 110]`<br>
+&emsp; ■ `P[X > 130]`<br>
+B. 請畫出圖形來解釋你的運算
+</p class="qiz">
+
+```{r}
+x1 = 90; x2 = 130
+p1 = pnorm(x1,100,20); p2 = pnorm(x2,100,20)
+c(p1, p2 - p1, 1 - p2)
+```
+
+```{r fig.height=2, fig.width=8}
+par(mfrow=c(1,2), mar=c(2,2,2,2),cex=0.7)
+curve(dnorm(x,100,20),40,160,main="PDF")
+abline(v=c(x1,x2),col='gray',lty=3)
+x = seq(x1,x2,length=100)
+polygon(c(x, x2, x1), c(dnorm(x,100,20), 0, 0), col="#00E9001F", border=NA)
+#
+curve(pnorm(x,100,20),40,160,main="CDF")
+abline(v=c(x1,x2),col='gray',lty=3)
+abline(h=c(p1,p2),col='pink')
+```
+<br><br>
+
+##### B5. `q<name>: q for quantile` 百分位函數 
+`q<name>`通常用來求取對應到某一機率的臨界值，如果隨機變數`X ~ Normal[mu, sd]`，`qnorm(p=0.8, mu, sd)`會傳回`Pr[X < x1] = 0.8`的臨界值`x1`；
+```{r}
+qnorm(p=0.8, 100, 20)
+```
+
+<p class="qiz">
+<span style="font-size:24px">`r "\U1F5FF"` 問題討論：</span><br>
+A. 如果隨機變數`X ~ Normal[mu=100, sd=20]`，請求`X`的90%信賴區間 <br>
+B. 請畫出圖形來解釋你的運算
+</p class="qiz">
+<br><br><hr>
+
+
+### 【C】實證分布的應用 Empirical Distribution
+CASE STUDY: THE OLD FAITHFUL
+<br><br><hr>
+
+
+### 【D】理論分布 Theoretical Distribution
+
+##### D1. Binomial vs. Normal Distribution
+<span style="font-size:24px">`r "\U1F4A1"`</span> :
+When $n$ is large, $Binom[n, p]$ approaches $Norm[\mu = n p, \sigma=\sqrt{n p (1-p)}]$ 
+
+<span style="font-size:24px">`r "\U1F4A1"`</span> :
+$X \sim Binom[n, p] \, \Rightarrow 
+\, Exp(X) = n \cdot p \, , \, Var(X) = n \cdot p \cdot (1-p)$
+
+```{r fig.height=2.4, fig.width=7.2}
+par(mfrow=c(1,1), cex=0.7)
+n = 1000; p = 0.2
+rbinom(500000, n, p) %>% hist(breaks=80, freq=F)
+curve(dnorm(x, mean=n*p, sd=sqrt(n*p*(1-p))), col='red', lwd=2, add=T)
+```
+
+<span style="font-size:24px">`r "\U1F4A1"`</span> :
+When $n$ is not large enough, Binormal degenerates into a discrete distribution.
+```{r fig.height=2.4, fig.width=7.2}
+par(mfrow=c(1,2), cex=0.7)
+n = 10; p = 0.2
+rbinom(100000, n, p) %>% hist(freq=F, breaks=(0:n)-0.01)
+rnorm(100000, n*p, sqrt(n*p*(1-p))) %>% hist(freq=F)
+```
+<br><br>
+
+##### D2. Binomial vs. Poisson Distribution
+<span style="font-size:24px">`r "\U1F4A1"`</span> :
+When $n$ is large and $p$ is small, $Binom[n, p]$ approaches $Pois[\lambda = n p]$ 
+```{r fig.height=2.4, fig.width=7.2}
+par(mfrow=c(1,2), cex=0.7)
+rbinom(100000, 1000, 0.002) %>% table %>% barplot(main="Boinomial")
+rpois(100000, 2)  %>% table %>% barplot(main="Poisson")
+```
+
+<span style="font-size:24px">`r "\U1F4A1"`</span> :
+$X \sim Pois[\lambda_1], \, Y \sim Pois[\lambda_2] \, \Rightarrow \, X+Y \sim Pois[\lambda_1 + \lambda_2]$ 
+```{r fig.height=2.4, fig.width=7.2}
+par(mfrow=c(1,2), cex=0.7)
+rbinom(100000, 1000, 0.002) %>% table %>% barplot(main="Boinomial")
+rpois(100000, 2)  %>% table %>% barplot(main="Poisson")
+```
+<br><br>
+
+##### D3. Geometric Dist. - the Dist. of Waiting Time
+<span style="font-size:24px">`r "\U1F4A1"`</span> :
+We can simulating Geometrics Dis. by Binomial Dist.
+```{r fig.height=4, fig.width=7.2}
+par(mfrow=c(2,1), cex=0.7, mar=c(3,3,3,1) )
+replicate(100000, which(rbinom(100, 1, .2) == 1)[1] - 1) %>% 
+  table %>% barplot(main="Binomial Simulation")
+rgeom(100000, 0.2) %>% table %>% barplot(main="Geometric")
+```
+
+<span style="font-size:24px">`r "\U1F4A1"`</span> :
+$X \sim Geom[p] \, \Rightarrow \, E[X] = \frac{1}{p}-1$ 
+<br>
+
+If a machine has a probabaility of being broken in any given day, what is the probability that this machine is still workng in 30 days.
+```{r}
+par(mfrow=c(2,1), cex=0.7, mar=c(3,3,3,1))
+pgeom(0:29, prob=0.1) %>% 
+  barplot(names=1:30, main="broke by the end of the #th day")
+(1- pgeom(0:29, prob=0.1)) %>% 
+  barplot(names=1:30, main="still working by the end of the #th day")
+```
+<br><br><hr>
+
+### 【E】理論分布的實證應用 
+
+##### E1. Death by Horse Kick
+The Data
+```{r}
+par(mfrow=c(1,1), cex=0.7)
+(HK = HorseKicks)
+```
+
+Does it comply to Poisson Distribution?
+```{r}
+fit = goodfit(HK, type = "poisson")
+summary(fit)
+```
+
+What is the $\lambda$?
+```{r}
+fit$par
+```
+
+What is the probability of `nDeath >= 2`?
+```{r}
+1 - ppois(1, fit$par$lambda)
+```
+<br><br>
+
+##### E2. "May" in Federalist Papers
+```{r}
+(Fed = Federalist)
+```
+
+Does it comply to Poisson Distribution?
+```{r}
+fit <- goodfit(Fed, type = "poisson")
+summary(fit)
+```
+
+Does it comply to Negtive Binomial Distribution?
+```{r}
+fit = goodfit(Fed, type = "nbinomial")
+summary(fit)
+```
+
+What are the parameters?
+```{r}
+fit$par
+```
+
+How does the distribution looks like?
+```{r}
+dnbinom(0:10, fit$par$size, fit$par$prob)
+```
+
+How is the probability that `2 <= nMay <= 6`?
+```{r}
+pnbinom(6, fit$par$size, fit$par$prob) - pnbinom(1, fit$par$size, fit$par$prob)
+```
+<br>
+
+<p class="qiz">
+<span style="font-size:24px">`r "\U1F5FF"` 問題討論：</span><br>
+在`cup.csv`檔案裡面是一千個信徒的擲筊次數，假定每一個人都是擲到3次成功才停止，請問：
+&emsp; ■ 這個筊的成功機率大約是？<br>
+&emsp; ■ 請畫出用這個筊擲10次成功之前，失敗次數的機率分布？<br>
+&emsp; ■ 用這個筊擲15次還不能有5次成功的機率是？<br>
+</p class="qiz">
+
+<br><br><hr>
+
+
+
+

@@ -1,0 +1,211 @@
+---
+title: "AS6-2: 資料案例：老忠實"
+author: "第 1 組"
+date: "`r Sys.time()`"
+output: 
+  html_document:
+    highlight: pygments
+    theme: flatly
+    css: JH.css
+---
+
+```{r}
+library(shinyWidgets); library(flexdashboard)
+library(dplyr); library(ggplot2); library(plotly); library(DT)
+D = faithful$waiting
+```
+
+```{r}
+D = faithful$waiting/10  # copy to a short name
+```
+
+```{r}
+# Frame
+plot(0,0,xlim=c(4,10),ylim=c(0,1.1),xlab="等待時間(分鐘)", 
+     ylab="密度 or (累計)機率", main="分布、機率與密度")
+abline(h=1, col='lightgray', lwd=0.25, lty=2)
+
+# Empirical PDF
+rug(D)
+
+# Empirical CDF
+plot(ecdf(D), cex=0, verticals=T, lwd=2, col='darkgray', add=T)
+
+# Histogram PDF
+Bins = 10                             # no. bins
+bx = seq(min(D), max(D), length=Bins+1) # break sequence 
+hist(D, col="#B3FFFF7F", border="white", ylim=c(0,1.1),
+     freq=F, breaks=bx, add=T)
+abline(h=0, col='lightgray', lwd=0.25)
+
+# Histogram CDF
+adj = (bx[2] - bx[1])/2
+steps = stepfun(bx-adj, c(0, sapply(bx, function(b) mean(D <= b))))
+plot(steps, cex=0, col='#33CC337F', lwd=3, lty=1, add=T)
+
+# Smooth PDF
+Adjust = 0.5    # bandwidth adjustment
+DEN = density(D, adjust = Adjust)
+lines(DEN, col='gold', lwd=3)
+
+# Smooth CDF
+PDF = approxfun(DEN$x, DEN$y, yleft=0, yright=0)
+x = seq(4, 10, 1)
+y = sapply(x, function(i) integrate(PDF, -Inf, i)$value)
+lines(x, y, col='red', lwd=3, lty=2) 
+```
+
+
+【A.選擇方法】<br>
+&emsp;■ 我們為甚麼需要隨機變數？ 什麼時候我們需要用到隨機變數？<br>
+Ans. 當對一件事情具有不確定因素時，且我們無法取得所有母體資料時，我們需要對他做預測時即可使用隨機變數。<br>
+&emsp;■ 隨機變數沒有固定的值，那我們要如何做計算呢？<br>
+Ans. 透過不斷重複試驗去了解各個隨機變數值的分布。？<br>
+&emsp;■ 我們可以用直方圖或數值標記來估計等待時間落在某一區間的機率嗎？<br>
+Ans. 可以，因為可以去計算區間內所發生的次數占全部次數的比例。？<br>
+&emsp;■ 直方圖(histogram)也可以當作一種模型嗎？ 數值標記(rug)呢？<br>
+Ans. 是，因模型可幫助我們做預測，直方圖所提供給我們的機率提供我們做下一次的預測。數值標記則不是，因為該模型是用真實時間點，所以易有overfitting的問題。？<br>
+&emsp;■ 直方圖和平滑模型哪一個比較適合用來表示噴發時間的分布？ 為甚麼？<br>
+Ans. 平滑模型較適合，因直方圖易受到區間長度的影響。？<br>
+&emsp;■ 用數值標記來預測噴發時間會比用直方圖「準」嗎？ 「準」是什麼意思呢？<br>
+Ans. 並不一定，因預測性資料與模型資料的分布並不一定會是完全相符；準的意思是去描述估計值與實際值誤差是否相近。？<br>
+
+<br>
+
+【B.調整參數】調整一下模型參數的滑桿 ...<br>
+&emsp;■ 你覺得最合適的直方圖欄數(`support/binwidth`)是？ 為甚麼？<br>
+Ans. 在binwidth=16時，因做出來的圖型較趨近常態。<br>
+&emsp;■ 最合適的平滑模型頻寬(`bandwidth`)呢？<br>
+Ans. 當bandwidth=0.7時較接近常態。<br>
+&emsp;■ 調高欄寬和頻寬會讓模型變複雜，還是變簡單呢？<br>
+Ans. 直方圖變較複雜、平滑模型變簡單。<br>
+&emsp;■ 模型越複雜，它跟實際值之間的誤差是越大、還是越小？<br>
+Ans. 誤差越小，因數值更精確。<br>
+&emsp;■ 那麼，越複雜的模型就會越準，對嗎？<br>
+Ans. 不一定，容易overfitting。<br>
+
+<br>
+
+【C.建立模型、估計機率】<br>
+請從課堂筆記的程式碼找出來 ... <br>
+&emsp;■ 從變數向量(`D`)求出機率密度曲線(`DEN`)<br>
+```{r}
+plot(0,0,xlim=c(4,10),ylim=c(0,1.1),xlab="等待時間(分鐘)", 
+     ylab="密度 or (累計)機率", main="分布、機率與密度")
+abline(h=1, col='lightgray', lwd=0.25, lty=2)
+Adjust = 1    # bandwidth adjustment
+DEN = density(D, adjust = Adjust)
+lines(DEN, col='gold', lwd=3)
+```
+
+&emsp;■ 將機率密度曲線(`DEN`)轉換成機率密度函數(`PDF`)<br>
+```{r}
+PDF = approxfun(DEN$x, DEN$y, yleft=0, yright=0)
+```
+
+&emsp;■ 對機率密度函數(`PDF`)做積分，算出機率(`PROB`)<br>
+```{r}
+x = seq(4,10,1)
+y = sapply(x, function(i) integrate(PDF, -Inf, i)$value)
+```
+
+這三行程式，然後...<br>
+
+&emsp;■ 將頻寬調整參數(`adjust`)設為`1`，算出「等待時間」落在80到90之間的機率<br>
+```{r}
+Adjust = 1    # bandwidth adjustment
+DEN = density(D, adjust = Adjust)
+
+# Smooth CDF
+PDF = approxfun(DEN$x, DEN$y, yleft=0, yright=0)
+x = seq(4, 10, 1)
+y = sapply(x, function(i) integrate(PDF, -Inf, i)$value)
+x1 = 8; x2 = 9
+integrate(PDF, x1, x2)$value
+```
+
+&emsp;■ 將頻寬調整參數設為`0.5`，算出等待時間落在80到90之間的機率<br>
+```{r}
+Adjust = 0.5    # bandwidth adjustment
+DEN = density(D, adjust = Adjust)
+
+# Smooth CDF
+PDF = approxfun(DEN$x, DEN$y, yleft=0, yright=0)
+x = seq(4, 10, 1)
+y = sapply(x, function(i) integrate(PDF, -Inf, i)$value)
+x1 = 8; x2 = 9
+integrate(PDF, x1, x2)$value
+```
+
+&emsp;■ 算出來的機率比較高的就是比較好的模型，對嗎？ 為甚麼？<br>
+<br>
+Ans. 不一定，因為較高只是較接近模型實際值，預測的話則不一定比較準。<br>
+ 
+ <br>
+
+【D.預測與決策】<br>
+假設有一個賭局，你可以花30元選定一個連續60秒的時段，如果老忠實下一次的噴發時間落在你指定的區間，你就可以贏到100元；請你使用頻寬為`0.5`的平滑密度模型 ...<br>
+&emsp;■ 決定要不要參加這個賭局<br>
+Ans. 要，因期望值比30大。<br>
+&emsp;■ 如果你參加的話，你要把噴發時間設定在哪一個區間呢？<br>
+Ans. 設定3.9 - 4.9的區間。<br>
+&emsp;■ 你設在這個區間的話，參加這個賭局的期望值是？<br>
+Ans. $70*0.477 + (-30)*(1-0.477) = 17.66$元。<br>
+<br>
+
+<br>
+
+假如賭場老闆從零開始把每10秒鐘設為一個區間，每個區間的賭金是五塊錢 ...<br>
+&emsp;■ 你要怎麼押注，才能獲得最高的期望值呢？<br>
+
+假設跟上一題一樣，一個區間中了可以贏100元，根據分析結果，在機率最高的前九個區間投注，可以獲得最高的利潤(期望報酬減賭金)
+
+```{r}
+Adjust = 0.5    # bandwidth adjustment
+D = faithful$eruptions
+DEN = density(D, adjust = Adjust)
+PDF = approxfun(DEN$x, DEN$y, yleft=0, yright=0)
+
+i1 = seq(0, 5.1 - 1/6, 1/6)
+i2 = seq(0 + 1/6, 5.1, 1/6)
+p2 = data.frame(i1, i2)
+for(i in 1:30){
+  p2[i, 3] = integrate(PDF, i1[i], i2[i])$value
+}
+p2_order <- p2[order(p2$V3, decreasing = T), ]
+
+x_max <- 0
+x_a <- 0
+for (x in 1:30){
+  tmp = (95 * sum(p2_order[1:x, 3]) - 5 * (1 - sum(p2_order[1:x, 3]))) - 5*x
+  if(tmp > x_max){
+    x_max = tmp
+    x_a = x
+  }
+}
+x_a
+```
+
+```{r}
+head(p2_order, 9)
+```
+
+&emsp;■ 你的賭金和期望值各是多少？<br>
+Ans. 需要花5*9 = 45元, 期望報酬＝ 64.33797，可以賺 19.33797 元
+      <br>
+```{r}
+X = 9
+(95 * sum(p2_order[1:X, 3]) - 5 * (1 - sum(p2_order[1:X, 3]))) # 丟45元，可以拿回的錢
+
+64.33797 - 45
+```
+
+
+
+將獲利的期望值和賭金的比值稱為「期望投資報酬率」 ...<br>
+&emsp;■ 「最大期望投資報酬率」和「最大期望報酬」的投資策略是一樣的嗎？<br>
+Ans.不一樣，最大期望投資報酬率是我們每投入的錢能賺回最多的比率；最大期望報酬擇時我不管投多少資金，我要拿回最多的錢，最後是有可能賠錢的。所以用最大期望投資報酬率是比較好的投資策略。<br>
+&emsp;■ 你認為哪一個策略目標比較好呢？ 為什麼？<br>
+最大期望投資報酬率比較好，理由同上。
+
+<br>

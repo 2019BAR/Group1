@@ -1,0 +1,281 @@
+---
+title: "資料案例：老忠實"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: default
+    css: JH.css
+    social: menu
+    source_code: embed 
+    logo: nsysu48.png
+    favicon: nsysu48.png
+    orientation: rows
+runtime: shiny
+---
+
+```{r}
+library(shinyWidgets); library(flexdashboard)
+library(dplyr); library(ggplot2); library(plotly); library(DT)
+D = faithful$eruptions
+```
+
+故事
+=====================================
+
+Row {data-height=250}
+-------------------------------------
+    
+### 噴發實況 {data-width=560}
+<iframe width="560" height="315"  frameborder="0" src="https://www.youtube.com/embed/4mZY7uxb7Gc?start=6"  allowfullscreen></iframe>
+
+### 老忠實的故事 {data-width=400}
+1870年9月18日下午，沃什布恩-蘭福德-多恩探險團從克卜勒瀑布沿火洞河進入上間歇泉盆地。他們第一個看到的間歇泉就是老忠實。在納撒尼爾·皮特·蘭福德1871年出版的探險記錄中，他寫道：“ ... 在第二天旅途的下午三點左右，我們進入了這個盆地、看到了清晰的陽光，最令我們驚奇的是在不遠處一個乾淨、密集而閃閃發光的水柱噴向了一百二十五英尺高空。「間歇泉！間歇泉！」我們的一個同伴叫道，踢打著身下倦怠的馬，我們聚集到了這奇境四周。這絕對是一個完美的間歇泉。水汽穿過孔穴形成一個不規則的橢圓，直徑三點七英尺，其中是帶著各種沉積物的小水珠。這個間歇泉高出它所在平原三十英尺，噴發口又高出五或六英尺。在我們呆在那裡的時候，它有規律地噴發了九次，沸水噴發的高度從九十至一百二十五英尺不等，每次持續約十五至二十分鐘。我們把它命名作「老忠實」” - Nathaniel P. Langford, 1871
+
+
+Row {data-height=355}
+-------------------------------------
+   
+### Old Faithful {data-width=300}
+```{r}
+img(src="http://www.geyserstudy.org/_ShowImage.aspx?pSize=400&pImg=geysers/OLDFAITHFUL/pictures/main.jpg"); br()
+```
+Geyser Observation & Study Association - [GOSA](http://www.geyserstudy.org/geyser.aspx?pGeyserNo=OLDFAITHFUL)
+
+### Wyoming's Old Faithful
+```{r}
+img(src="https://web-archive-2017.ait.org.tw/infousa/zhtw/American_Story/assets/es/wy/es_wy_oldfaith_1_e.jpg", height="91%", width="91%"); br()
+```
+Amarican's Story, [美國國會圖書館, AIT Taiwan](https://web-archive-2017.ait.org.tw/infousa/zhtw/American_Story/es/wy/es_wy_oldfaith_1_e.html)
+
+
+資料檢視 {data-orientation=columns}
+=====================================
+
+Column 
+-------------------------------------
+### 內建資料集： `data(faithful)` {data-height=140}
+這是一個非常簡單的內建資料集，它只有兩個欄位：`eruptions`和`waiting`，分別紀錄了272次老忠實間歇泉的噴發時間和等待時間(分鐘數)。
+
+### 資料結構： `str(faithful)` {data-height=180}
+```{r}
+str(faithful)
+```
+
+### 簡單的統計量： `summary(faithful)` {data-height=260}
+```{r}
+summary(faithful)
+```
+
+### 統計量與資料表格 
+從以上這一些簡單的統計量，我們大致上可以知道噴發時間和等待時間的範圍；我們還可以將整個資料表格印出來(如右側)，但是這還是不能讓我們看出這兩個『變數』的『分布』；想要了解變數的分佈情況，我們需要使用直方圖和機率密度函數這一些工具 (請看[下一頁](http://140.117.69.135:4949/tonychuo/Faith.Rmd#dashboard-8)) ...
+
+右側的點狀圖除了呈現個別變數的分佈狀況之外，也可以幫助我們觀察兩個變數之間的關係；這個章節我們先討論單一變數的分佈，我們會等到回歸分析的章節再跟大家討論變數之間的關係。
+
+
+Column {data-width=800}
+-------------------------------------
+### 資料表格 {data-height=250}
+```{r}
+renderDataTable({ 
+  datatable(
+    faithful, extensions=c('Scroller','ColReorder'), options=list(
+      deferRender=T, scrollY=200, scroller=T, colReorder=T)) %>% 
+  formatStyle(columns=0:2, fontSize = '80%')
+  })
+```
+
+### 點狀圖 {data-width=550}
+```{r fig.height=4.2, fig.width=4}
+ggplot(faithful, aes(waiting, eruptions)) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', se=F) +
+  xlab("Waiting Time") + ylab("Eruption Time") + 
+  ggtitle("Eruptions")
+```
+
+
+變數分布 {data-orientation=columns}
+=====================================
+
+Column {data-width=200}
+-------------------------------------
+
+### 選項 {data-height=750}
+```{r}
+inputPanel(
+  h6("估計機率："),
+  renderGauge({
+    DEN = density(D, adjust = input$B)
+    PDF = approxfun(DEN$x, DEN$y, yleft=0, yright=0)
+    PROB = integrate(PDF, input$R[1], input$R[2])$value
+    gauge(round(100*PROB), min = 0, max = 100, symbol = '%', gaugeSectors(
+      success = c(41, 100), warning = c(21, 40), danger = c(0, 20)) )
+    }),
+  sliderInput("R", "數值範圍", 1, 6, c(1,1), 0.2, width='400px'),
+
+  h6("變數分布(PDF,機率密度函數)："),
+  checkboxInput("rug", "數值標記 rugs()", F),
+  prettyCheckbox("hist", "直方圖 hist() ", T, status="info", shape="curve"),
+  prettyCheckbox("pdf", "平滑密度函數 density()", T, status="warning", shape="curve"),
+  
+  h6("圖形(模型)參數："),
+  sliderInput("W", "直方圖欄數(support/binwidth)", 10, 40, 20, 2, width='400px'), 
+  sliderInput("B", "平滑模型頻寬(bandwidth)", 0.3, 1.8, 1, 0.1, width='400px'),
+  
+  h6("累計機率函數(CDF)："),
+  checkboxInput("cdf.r", "真實累計機率函數", F),
+  prettyCheckbox("cdf.h", "直方圖累計機率函數", T, status="success", shape="curve"),
+  prettyCheckbox("cdf.d", "平滑模型累計機率函數", T, status="danger", shape="curve")
+  
+  )
+```
+
+
+Column
+-------------------------------------
+### 變數分布 & 機率(密度)函數 {data-height=400}
+```{r}
+renderPlot({
+  par(mar=c(4,4,2,1))
+  plot(0,0,xlim=c(1.5,5.25),ylim=c(0,1.1),xlab="噴發時間(分鐘)", 
+       ylab="密度 or (累計)機率", main="分布、機率與密度")
+  abline(h=1, col='gray', lwd=0.5, lty=2)
+
+  bx = seq(min(D), max(D), length.out=input$W)
+  adj = (bx[2] - bx[1])/2
+  DEN = density(D, adjust = input$B)
+  PDF = approxfun(DEN$x, DEN$y, yleft=0, yright=0)
+
+  if(input$rug) rug(D)
+  if(input$hist) hist(
+    D,freq=F,col="#B3FFFF",border="white",
+    ylim=c(0,1.1),add=T,breaks=bx)
+  if(input$pdf) lines(DEN, col='gold', lwd=3)
+  
+  if(input$cdf.r) plot(ecdf(D), cex=0, verticals=T, add=T, lwd=2, col='darkgray')
+  if(input$cdf.h) plot(
+    stepfun(bx - adj, c(0, sapply(bx, function(b) mean(D <= b)))),
+    cex=0, col='#33CC337F', lwd=3, add=T)
+  if(input$cdf.d) {
+    x = seq(1,6,0.1)
+    lines(x, sapply(x, function(i) 
+      integrate(PDF, 1, i)$value), col='red', lwd=3, lty=2) 
+    }
+
+  #rect(input$R[1],-0.2,input$R[2],1.2,col= rgb(0,1,0,alpha=0.1),border=NA)
+  x = seq(input$R[1], input$R[2], length=100)
+  polygon(c(x, input$R[2], input$R[1]),  c(PDF(x), 0, 0), 
+          col="#FF99003F", border=NA)
+  abline(h=0, col='gray', lwd=0.5)
+
+  })
+```
+
+
+### <span style="font-size:22px">`r "\U1F4A1"` 學習重點：</span>  {data-height=250}
+<p class="wwl">
+【A】從第五周的「[有獎徵答](https://gtonychuo.github.io/2019RPB/unit05/quiz05.html)」我們學到使用`頻率`、`密度`和`機率`來表示`隨機變數`的`分布`<br>
+&emsp;■ 分布：變數的值所出現的頻率<br>
+&emsp;■ 連續變數的分布有三種表達方式：次數(頻率)、密度、機率<br>
+&emsp;■ `連續變數`和`離散變數`的分布的表達方式是不一樣的<br>
+<br>
+【B】從這一份練習，我們學到：<br>
+&emsp;■ 平均值、標準差等`統計量`可以表達隨機變數的概況，但它們無法完整表示隨機變數的分布<br>
+&emsp;■ 透過`圖形`或`數學函數`，我們才能清楚地表示和運算(估計、預測)隨機變數的分布<br>
+&emsp;■ `模型`：將現實抽象化(Abstract of Reality)，使其好懂(好溝通)或好計算<br>
+&emsp;■ 圖形和數學函數都可以用來表示隨機變數的分布，前者好懂，後者方便運算<br>
+&emsp;■ `數值標記`、`直方圖`和`平滑密度曲線`都可以寫成`機率密度函數(PDF)`<br>
+&emsp;■ 數值標記和直方圖的函數形式比較複雜，也容易有量化誤差<br>
+&emsp;■ 因此平滑密度曲線通常比較適合用來表示連續變數的分布<br>
+&emsp;■ 機率密度函數(PDF)積分之後就可以得到`累計機率函數(CDF)`，前者好懂，後者好算<br>
+<br>
+【C】資料、模型、方法、參數：<br>
+&emsp;■ 透過調整`方法參數`，同一份資料用同一種`方法`可以做出不同的`模型`<br>
+&emsp;■ 通常模型越複雜，它跟訓練資料之間的誤差就越小<br>
+&emsp;■ 但是模型太複雜就會失去一般性，反而不能夠準確的估計訓練資料以外的對象<br>
+&emsp;■ 所以我們需要用方法參數來控制分析方法的複雜度，避免`過度適配`(`over fitting`)<br>
+<br>
+【D】估計機率的程序：<br>
+&emsp;■ 選擇分析方法<br>
+&emsp;■ 藉由調整方法參數盡量找出最適(PDF)模型<br>
+&emsp;■ 透過積分，從PDF求出CDF<br>
+&emsp;■ 根據變數的範圍，從CDF求出機率<br>
+<br>
+</p class="wwl">
+
+
+### <span style="font-size:22px">`r "\U1F5FF"` 問題討論：</span>  {data-height=250}
+<p class="qiz">
+【A.選擇方法】<br>
+&emsp;■ 我們為甚麼需要隨機變數？ 什麼時候我們需要用到隨機變數？<br>
+&emsp;■ 隨機變數沒有固定的值，那我們要如何做計算呢？<br>
+&emsp;■ 我們可以用直方圖或數值標記來估計噴發時間落在某一區間的機率嗎？<br>
+&emsp;■ 直方圖(histogram)也可以當作一種模型嗎？ 數值標記(rug)呢？<br>
+&emsp;■ 直方圖和平滑模型哪一個比較適合用來表示噴發時間的分布？ 為甚麼？<br>
+&emsp;■ 用數值標記來預測噴發時間會比用直方圖「準」嗎？ 「準」是什麼意思呢？<br>
+<br>
+【B.調整參數】調整一下模型參數的滑桿 ...<br>
+&emsp;■ 你覺得最合適的直方圖欄數(`support/binwidth`)是？ 為甚麼？<br>
+&emsp;■ 最合適的平滑模型頻寬(`bandwidth`)呢？<br>
+&emsp;■ 調高欄寬和頻寬會讓模型變複雜，還是變簡單呢？<br>
+&emsp;■ 模型越複雜，它跟實際值之間的誤差是越大、還是越小？<br>
+&emsp;■ 那麼，越複雜的模型就會越準，對嗎？<br>
+<br>
+【C.建立模型、估計機率】<br>
+請從課堂筆記的程式碼找出來 ... <br>
+&emsp;■ 從變數向量(`D`)求出機率密度曲線(`DEN`)<br>
+&emsp;■ 將機率密度曲線(`DEN`)轉換成機率密度函數(`PDF`)<br>
+&emsp;■ 對機率密度函數(`PDF`)做積分，算出機率(`PROB`)<br>
+這三行程式，然後...<br>
+&emsp;■ 將頻寬調整參數(`adjust`)設為`1`，算出「等待時間」落在80到90之間的機率<br>
+&emsp;■ 將頻寬調整參數設為`0.5`，算出等待時間落在80到90之間的機率<br>
+&emsp;■ 算出來的機率比較高的就是比較好的模型，對嗎？ 為甚麼？<br>
+<br>
+【D.預測與決策】<br>
+假設有一個賭局，你可以花30元選定一個連續60秒的時段，如果老忠實下一次的噴發時間落在你指定的區間，你就可以贏到100元；請你使用頻寬為`0.5`的平滑密度模型 ...<br>
+&emsp;■ 決定要不要參加這個賭局<br>
+&emsp;■ 如果你參加的話，你要把噴發時間設定在哪一個區間呢？<br>
+&emsp;■ 你設在這個區間的話，參加這個賭局的期望值是？<br>
+<br>
+假如賭場老闆從零開始把每10秒鐘設為一個區間，每個區間的賭金是五塊錢 ...<br>
+&emsp;■ 你要怎麼押注，才能獲得最高的期望值呢？<br>
+&emsp;■ 你的賭金和期望值各是多少？<br>
+<br>
+將獲利的期望值和賭金的比值稱為「期望投資報酬率」 ...<br>
+&emsp;■ 「最大期望投資報酬率」和「最大期望報酬」的投資策略是一樣的嗎？<br>
+&emsp;■ 你認為哪一個策略目標比較好呢？ 為什麼？<br>
+<br>
+</p class="qiz">
+
+
+回歸分析 {data-orientation=columns}
+=====================================
+
+Column {data-width=600}
+-------------------------------------
+### 分群回歸模型 {data-height=600}
+```{r}
+mutate(faithful, type = ifelse(eruptions > 3, "Long", "Short")) %>% 
+  ggplot(aes(waiting, eruptions, col=type)) +
+    geom_point(alpha=0.5) +
+    geom_smooth(method='lm', se=F) +
+    geom_smooth(method='lm', se=F, col="gray", lty=2) +
+    xlab("Waiting Time") + ylab("Eruption Time") + 
+    ggtitle("Eruptions") + theme_bw() -> p
+ggplotly(p)
+```
+
+
+###
+```{r}
+
+```
+
+
+
+Column {data-width=200}
+-------------------------------------
+### 
+```{r}
+```
+
+
