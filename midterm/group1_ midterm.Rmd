@@ -1,0 +1,243 @@
+---
+title: "第一組期中報告"
+output:
+  html_document:
+    df_print: paged
+---
+# 一、Olist平台獲取潛在賣家管道及轉換率分析
+
+### 導入資料並建立顧客下單到交貨之間各階段的時間間隔變數
+```{r}
+load("./data/olist_1.RData")
+```
+
+### 將併完的資料框新增變數
+```{r}
+order$year = format(order$order_purchase_timestamp, "%Y") # 顧客下單年份
+order$month = format(order$order_purchase_timestamp, "%m") # 顧客下單月份
+order$week = format(order$order_purchase_timestamp, "%w") # 看顧客下單星期幾
+order = order[, c(2,3,4,21,25,5,11:20,22:24,26:39)]
+```
+
+### 潛在賣家獲取途徑排名以及各途徑潛在賣家轉換為正式賣家轉換率排名
+```{r}
+library("dplyr")
+olist_marketing_qualified_leads_dataset$on = ifelse(olist_marketing_qualified_leads_dataset$mql_id %in% olist_closed_deals_dataset$mql_id,1,0)
+
+olist_marketing_qualified_leads_dataset = subset(olist_marketing_qualified_leads_dataset, origin!= "unknown")
+
+table(olist_marketing_qualified_leads_dataset$origin)%>% sort(decreasing = T) %>% head(5) %>%  barplot(main = "潛在賣家獲取途徑", col = "blue")
+
+tapply(olist_marketing_qualified_leads_dataset$on,olist_marketing_qualified_leads_dataset$origin, mean) %>% sort(decreasing = T)%>% head(5) %>%  barplot(main = "潛在賣家獲取管道轉換率排名", col = "orange")
+
+```
+# 二、影響賣家原因及如何改善
+
+### 以熱圖觀察評分與月份的關係
+```{r}
+library("d3heatmap")
+order = na.omit(order)
+table(order$month, order$review_score) %>%
+  prop.table(2) %>%
+  as.data.frame.matrix %>%
+  d3heatmap(F,F,col=colorRamp(c('seagreen','lightyellow','red')))
+```
+### 依照運送時間長度排序月份
+```{r}
+x = subset(order, ctcust>11)
+# table(x$customer_city) %>% sort(decreasing = T)
+# table(x$customer_state) %>% sort(decreasing = T)
+table(x$month) %>% sort(decreasing = T)  %>%barplot(main = "運送時長前25%月份",col = "red")
+
+#繪製運送時長前五名的城市
+table(x$customer_city) %>% sort(decreasing = T) %>% head(5) %>%barplot(main = "運送時長前5名城市",col = "green")
+
+#table(order$customer_state) %>% sort(decreasing = T)
+#table(x$customer_state) %>% sort(decreasing = T)
+```
+
+# 三、將賣家分群
+### 整理訂單中與賣家相關資訊
+```{r}
+library(readr)
+#將order_item以賣家做整理
+items <- read_csv("data/olist_order_items_dataset.csv")
+seller_information <- items %>% 
+  group_by(seller_id) %>% 
+  summarise(
+    items = n(),
+    amount = sum(price),
+    products = n_distinct(product_id),
+    avg_price = mean(price),
+    max_price = max(price),
+    min_price = min(price),
+    avg_freight = mean(freight_value),
+    avg_amount_by_product = amount/products,
+    avg_item_by_product = products/items
+  ) %>% 
+  arrange(desc(amount))
+```
+### 整理評論資訊
+```{r}
+reviews <- read_csv("./data/olist_order_reviews_dataset.csv")
+
+review_information <- unique(items[, c("order_id", "seller_id")]) %>% 
+  left_join(reviews, by = c("order_id")) %>% 
+  group_by(seller_id) %>% 
+  summarise(
+    count_reviews = n(),
+    avg_score = mean(review_score),
+    min_score = min(review_score),
+    max_score = max(review_score)
+  ) 
+summary(review_information)
+```
+
+### 將兩表合併，合併後無NA，每個賣家都有評論資料
+```{r}
+sellers <- read_csv("./data/olist_sellers_dataset.csv")
+
+seller_summary <- seller_information %>% 
+  left_join(review_information, by = "seller_id") %>% 
+  left_join(sellers, by = "seller_id")
+sapply(seller_summary, function(x) sum(is.na(x)))
+head(seller_summary)
+```
+
+### 計算個賣家延遲交貨次數
+```{r}
+orders <- read_csv("data/olist_orders_dataset.csv")
+orders_delay <- orders %>% 
+  mutate(delay = order_delivered_customer_date > order_estimated_delivery_date) %>% 
+  select(order_id, delay) %>%
+  filter(!is.na(delay)) %>% 
+  left_join(items, by = "order_id") %>% 
+  select(seller_id, order_id, delay) %>% 
+  group_by(seller_id) %>% 
+  summarise(total_delay = sum(delay))
+
+```
+
+### 彙整賣家資訊：可以看出各賣家 產品、評分、遲交、產業
+```{r}
+seller_summary <- seller_summary %>% 
+  inner_join(orders_delay, by = "seller_id")
+```
+
+### 整理由潛在賣家成功轉變成真實賣家的資料，並挑選出產業類別
+```{r}
+closed_deals <- read.csv("data/olist_closed_deals_dataset.csv")
+seller_segment <- closed_deals %>% 
+  select(seller_id, business_segment)
+seller_summary <- seller_summary %>% 
+  inner_join(seller_segment, by = "seller_id")
+seller_summary
+```
+
+### 將統整過後的賣家資訊分群，畫成樹狀圖
+```{r}
+library(ggplot2)
+A <- seller_summary %>% 
+  select(items, amount, avg_price, avg_freight, avg_score, count_reviews, total_delay)
+
+seller_clus <- seller_summary %>% 
+  select(items, amount, avg_price, avg_freight, avg_score, count_reviews, total_delay) %>% 
+  scale() %>% 
+  data.frame()
+
+hc = hclust(dist(seller_clus, method="euclidean"), method='ward.D')
+plot(hc)
+rect.hclust(hc, k = 3, border = "red")
+```
+### 將分成三群的賣家，繪製成長條圖，並觀察三群的表現
+```{r}
+kg = cutree(hc, k = 3)
+table(kg)
+
+sapply(split(A, kg), colMeans) %>% round(2) 
+
+par(cex=0.8)
+split(seller_clus, kg) %>% 
+  sapply(colMeans) %>% 
+  barplot(beside = T, col = rainbow(7))
+legend('topright',legend=colnames(A),fill=rainbow(7))
+```
+### 將分群資訊加回原賣家資料中，可知道各個賣家屬於哪一群
+```{r}
+seller_summary$cluster <- factor(kg)
+
+seller_summary %>%
+  group_by(cluster) %>%
+  summarise(
+    count = n(),
+    revenue = sum(amount),
+    avg_item_sold = mean(items),
+    avg_price = revenue/avg_item_sold,
+    avg_amount = mean(amount),
+    avg_review = mean(count_reviews),
+    avg_score = mean(avg_score),
+    avg_delay = mean(total_delay)
+  )
+```
+
+### 將三群的賣家繪製成點圖，觀察販賣品項及營收表現
+```{r}
+B <- table(seller_summary$cluster, seller_summary$business_segment) %>% data.frame
+
+ggplot(seller_summary, aes(items, amount, color = avg_score)) + 
+  geom_point(alpha = 0.8) +
+  scale_x_log10() +
+  scale_y_log10() +
+  facet_wrap(~cluster)
+
+```
+
+# 將分群結果繪製在地圖上
+## 繪製google地圖
+```{r}
+library(ggmap)
+#google地圖平台API
+register_google(key = "AIzaSyCcWGW1EnWZwLzGqP74f28LySULFDWbiHQ")
+#畫出地圖
+map <- get_map(location = c('Brasil'), zoom = 5,language = "zh-TW",maptype = "roadmap")
+```
+## 處理地理資訊
+```{r}
+#讀入地理資訊
+geo = read.csv("./data/olist_geolocation_dataset.csv")
+names(geo)[names(geo)=="geolocation_zip_code_prefix"]="zip_code_prefix"
+names(geo)[names(geo)=="geolocation_city"]="city"
+names(geo)[names(geo)=="geolocation_state"]="state"
+
+#由於同一個zip_code有許多不同經緯度
+#為方便處理及繪圖，一個zip_code只取中位數經緯度
+newgeo=group_by(geo,zip_code_prefix)
+da = summarise(newgeo,lat=median(geolocation_lat),lng=median(geolocation_lng))
+```
+## 取出賣家分群資訊與地理資訊合併後繪圖
+```{r}
+#將賣家資訊和地理資訊資料合併
+group3_geo = seller_summary[,c("seller_id","seller_zip_code_prefix","cluster")]
+group3 = merge(group3_geo,da,by.x="seller_zip_code_prefix",by.y="zip_code_prefix",all.x = TRUE)
+#將賣家依照分群繪製成點圖在地圖上
+ggmap(map)+
+  geom_point(aes(x = lng, y = lat, col = factor(cluster)),size=1,data = group3, alpha = 0.6)
+```
+## 繪製遲交次數高之賣家
+```{r}
+#late為已整理過之遲交次數資料
+late = read.csv("./data/latefreq.csv")
+late = merge(late,sellers,by="seller_id",all.x = TRUE)
+late = merge(late,da,by.x="seller_zip_code_prefix",by.y="zip_code_prefix",all.x = TRUE)
+
+late$freq_fac=NA
+late[late$late_frq<30,]$freq_fac="0~30"
+late[late$late_frq>30&late$late_frq<=50,]$freq_fac="31~50"
+late[late$late_frq>50&late$late_frq<=100,]$freq_fac="51~100"
+late[late$late_frq>100,]$freq_fac=">100"
+late = filter(late,late_frq>50)
+late = na.omit(late)
+ggmap(map)+
+  geom_point(aes(x = lng, y = lat, col = freq_fac),size=2,data = late, alpha = 0.6)
+```
+
