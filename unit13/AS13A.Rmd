@@ -1,0 +1,243 @@
+---
+title: UNIT13A：類別模型、預測機率與商業決策 
+subtitle: 案例一：預防性醫療
+author: 第一組
+date: "`r Sys.time()`"
+output: 
+  html_document:
+    highlight: pygments
+    theme: flatly
+    css: style.css
+---
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=F}
+# Formating Codes.  Do not change the codes in this chunk !!
+rm(list=ls(all=T))
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_knit$set(global.par = TRUE)
+par(cex=0.8)
+options(scipen=20, digits=5, width=80)
+if(!require(pacman)) install.packages("pacman")
+```
+<hr>
+
+```{r results='hide', message=FALSE, warning=FALSE}
+pacman::p_load(caTools, ggplot2, dplyr)
+```
+<br><hr>
+
+### 【A】整理資料、建立模型
+
++ 資料：糖尿病保戶醫療紀錄
+```{r}
+D = read.csv("data/quality.csv")  # Read in dataset
+summary(D)
+```
+
++ 基礎機率
+```{r}
+base = table(D$PoorCare) # the base probability
+```
+
++ 分割資料 (分割向量)
+```{r}
+set.seed(88)
+split = sample.split(D$PoorCare, SplitRatio = 0.75)  # split vector
+table(split) %>% prop.table()
+```
+
++ 目標變數與分割向量的列聯表
+```{r}
+table(D$PoorCare, split) %>% prop.table(2)
+```
+
++ 使用分割向量分割資料
+```{r}
+TR = subset(D, split == TRUE)
+TS = subset(D, split == FALSE)
+```
+
++ 建立模型
+```{r}
+glm1 = glm(PoorCare ~ OfficeVisits + Narcotics, TR, family=binomial)
+summary(glm1)
+```
+<br><hr>
+
+
+### 【B】模型、係數與效果
+
+**模型：**
+
++ `Pr[y = 1] = 1/(1+exp(-f(x)))` 
+
++ $Logit = f(x) = b_0 + b_1 x_1 + b_2 x_2 \;\; (1)$
+
++ $Logit = f(x) = -2.6461 + 0.0821 \times OfficeVisits + 0.0763 \times Narcotics \;\; (2)$
+
+**係數：**
+
++ $Odd_0 = Exp(b_0 + b_1 x_1)\;\;(3)$
+
++ $Odd_1 = Exp[b_0 + b_1(x_1+1)] = Exp(b_0 + b_1 x_1 + b_1) = Exp(b_0 + b_1 x_1) \times Exp(b_1) \;\;(4)$
+
++ $Odd_1 = Odd_0 \times Exp(b_1) \:\:(5)$
+
++ $facr{Odd_1}{Odd_0} =  Exp(b_1) \:\:(6)$
+
+<br>
+
+**機率和勝率之間的關係** 
+```{r} 
+pop = function(p, k) {o = p/(1-p);  o = k * o; o/(1+o)}
+p0 = seq(0.1, 0.9, 0.1); k = 2
+p1 = sapply(seq(0.1, 0.9, 0.1), pop, k)
+data.frame(k, p0, p1, difference=p1-p0, multiplier=p1/p0) %>% round(2) 
+```
+
+**變數的邊際效果** 
+```{r}
+df = data.frame(OfficeVisits = median(D$OfficeVisits), Narcotics=median(D$Narcotics))
+predict(glm1, df, type="response")
+```
+
+```{r}
+df = data.frame(OfficeVisits = median(D$OfficeVisits)+1, Narcotics=median(D$Narcotics))
+predict(glm1, df, type="response")
+```
+
+```{r}
+df = data.frame(OfficeVisits = median(D$OfficeVisits), Narcotics=median(D$Narcotics)+1)
+predict(glm1, df, type="response")
+```
+
+```{r}
+df = data.frame(OfficeVisits = median(D$OfficeVisits)+1, Narcotics=median(D$Narcotics)+1)
+predict(glm1, df, type="response")
+```
+
+<p class="wwl">
+<span style="font-size:24px">`r "\U1F4A1"` 學習重點：</span><br>
+&emsp; ■ 係數的指數就是勝率比；也就是說，$x_i$ 每增加一，勝率($Odd[y = 1]$)會變成原來的 $Exp(b_i)$ 倍<br>
+&emsp; ■ 各預測變數的(勝率)效果是相乘，而不是相加<br>
+&emsp; ■ 機率和勝率之間的關係並不是線性的：<br>
+&emsp; &emsp; ■ 邏輯式回歸裡面各預測變數的勝率效果是固定的<br>
+&emsp; &emsp; ■ 但是他們的機率效果並不是固定的<br>
+&emsp; &emsp; ■ 我們需先推算原先的機率，才能推算變數的機率效果<br><br>
+</p class="wwl"><br>
+
+
+```{r}
+quantile(D$OfficeVisits)
+```
+
+```{r}
+quantile(D$Narcotics)
+```
+<br>
+
+<p class="qiz">
+<span style="font-size:24px">`r "\U1F5FF"` 練習： </span><br>
+&emsp; ■ 當`OfficeVisits`和`Narcotic`分別等於他們的第一分位(`Q1`)時：<br>
+&emsp; &emsp; ■ `PoorCare = 1`的機率是？<br>
+```{r}
+df = data.frame(OfficeVisits = 7, Narcotics=0)
+predict(glm1, df, type="response")
+```
+
+&emsp; &emsp; ■ 兩個自變數的勝率效果分別是？<br>
+```{r}
+summary(glm1)
+```
+
+```{r}
+# 自變數的勝率效果為係數取exponential
+# OfficeVisits
+# exp(0.0821) = 1.0856, OfficeVisits增加一，勝率會增加8% 
+
+# Narcotics 
+# exp(0.0763) = 1.0793, Narcotics 增加一，勝率會增加7% 
+```
+
+&emsp; &emsp; ■ 兩個自變數的機率效果分別是？<br>
+```{r}
+df = data.frame(OfficeVisits = 7, Narcotics=0)
+x = predict(glm1, df, type="response")
+
+df1 = data.frame(OfficeVisits = 8, Narcotics=0)
+y = predict(glm1, df1, type="response")
+
+y - x
+
+# 在OfficeVisits等於第一分位時，此時的機率效果(x增加1時，y = 1增加的機率)為0.8%
+```
+
+```{r}
+df = data.frame(OfficeVisits = 7, Narcotics=0)
+x = predict(glm1, df, type="response")
+
+df1 = data.frame(OfficeVisits = 7, Narcotics=1)
+y = predict(glm1, df1, type="response")
+
+y - x
+# 在Narcotics等於第一分位時，此時的機率效果(x增加1時，y = 1增加的機率)為0.7%
+```
+
+&emsp; ■ 當`OfficeVisits`和`Narcotic`分別等於他們的第三分位(`Q3`)時：<br>
+&emsp; &emsp; ■ `PoorCare = 1`的機率是？<br>
+```{r}
+df = data.frame(OfficeVisits = 18.5, Narcotics=3)
+predict(glm1, df, type="response")
+
+# 答案：0.28947 
+```
+&emsp; &emsp; ■ 兩個自變數的勝率效果分別是？<br>
+```{r}
+summary(glm1)
+```
+
+```{r}
+# 自變數的勝率效果為係數取exponential
+# OfficeVisits
+# exp(0.0821) = 1.0856, OfficeVisits增加一，勝率會增加8% 
+
+# Narcotics 
+# exp(0.0763) = 1.0793, Narcotics 增加一，勝率會增加7% 
+```
+
+&emsp; &emsp; ■ 兩個自變數的機率效果分別是？<br>
+```{r}
+df = data.frame(OfficeVisits = 18.5, Narcotics=3)
+x = predict(glm1, df, type="response")
+
+df1 = data.frame(OfficeVisits = 19.5, Narcotics=3)
+y = predict(glm1, df1, type="response")
+
+y - x
+
+# 在OfficeVisits等於第三分位時，此時的機率效果(x增加1時，y = 1增加的機率)為1.7%
+```
+
+```{r}
+df = data.frame(OfficeVisits = 18.5, Narcotics=3)
+x = predict(glm1, df, type="response")
+
+df1 = data.frame(OfficeVisits = 18.5, Narcotics=4)
+y = predict(glm1, df1, type="response")
+
+y - x
+# 在Narcotics等於第一分位時，此時的機率效果(x增加1時，y = 1增加的機率)為1.5%
+```
+
+&emsp; ■ 比較以上兩個題目的答案，我們可以觀察到什麼？<br><br>
+```{r}
+# 不論x變數的值為何，勝率效果都是不變的，都是係數取exponential(exp(係數))
+# 不能直接用係數來推估機率效果，因為自變數的值不一樣的情況下，機率效果也會不同
+```
+
+</p class="qiz">
+
+<br><br><br><hr>
+
+
+
