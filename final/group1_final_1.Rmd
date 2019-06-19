@@ -1,0 +1,754 @@
+---
+title: "R商業分析期末報告"
+author: "Jason Hung"
+date: "2019/6/5"
+output:
+  html_document:
+    theme: lumen
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapse: yes
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 期末影片
+
+[https://www.youtube.com/watch?v=t9VmmugshPE&feature=youtu.be](https://www.youtube.com/watch?v=t9VmmugshPE&feature=youtu.be)
+
+## 載入套件
+
+```{r message=FALSE}
+library(readr)
+library(dplyr)
+library(purrr)
+library(ggplot2)
+library(lubridate)
+library(pROC)
+```
+
+
+## 讀取資料
+
+這一份資料是從2000/11 ~ 2001/2的交易資料
+
+- `TRANSACTION_DT`: 交易日期
+- `CUSTOMER_ID`: 顧客ID
+- `AGE_GROUP`: 年齡分群，從<25 ~ >65，5歲為一區隔
+- `PIN_CODE`: 地區編碼
+- `PRODUCT_SUBCLASS`: 產品類別
+- `PRODUCT_ID`: 產品ID
+- `AMOUNT`: 購買產品數量
+- `ASSET`: 成本
+- `SALES_PRICE`: 交易金額
+
+```{r}
+data <- read_csv("data/ta_feng_all_months_merged.csv") %>% 
+  setNames(c("date", "customer", "age", "area", "category", "product", "qty", "cost", "price"))
+```
+將資料讀取進來，並將colnames換成較簡易的名稱。
+
+## Data Cleaning
+
+### 格式處理
+先看個欄位的NA值有多少，只有`AGE_GRUOP`有22362個NA，大概佔所有 observation 2%左右。
+可以有兩種處理方式，第一種把NA值全部拿掉，第二個預測NA的可能族群
+```{r}
+sapply(data, function(x) sum(is.na(x)))
+```
+
+將`date`格式從char轉為`Date`，age group的na用文字`unknown`標籤取代
+```{r}
+data$date <- mdy(data$date)
+data$age[is.na(data$age)] <- "Unknown"
+data$age <- factor(data$age, levels = c("Unknown", "<25", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", ">65"), labels = c("Unknown", "a20", "a25", "a30", "a35", "a40", "a45", "a50", "a55", "a60", "a65")) %>% as.character()
+summary(data)
+```
+
+### 處理outlier
+
+`qty`、`cost`、`price`找這三欄outlier threshold值會是多少
+```{r}
+sapply(data[, 7:9], quantile, prob = c(.99, .999, .9995))
+```
+超過99.95%的資料我們不要
+```{r}
+grocery <- subset(data, qty <= 24 & cost <= 3799 & price <= 3999)
+```
+
+假設同一天同一位顧客當天的交易都是同一筆，並賦予交易序號
+```{r}
+grocery$tid <-  group_indices(grocery, date, customer) # same customer same day
+head(arrange(grocery, tid), 10)
+```
+處理完後檢視看看資料
+```{r}
+grocery %>% 
+  select(customer, category, product, tid) %>% 
+  sapply(n_distinct)
+summary(grocery)
+```
+
+## 經營現況
+
+### 每個年齡層分布數量
+```{r}
+grocery %>%
+  group_by(age) %>%
+  summarize(count = n()) %>% 
+  ggplot(aes(x = age, y = count, fill = age)) + 
+  geom_bar(stat = "identity")
+```
+
+
+## 產品資料分析
+
+前五名的商品
+```{r}
+top6product <- grocery %>% 
+  count(product) %>% 
+  arrange(desc(n)) %>% 
+  top_n(6)
+```
+
+```{r}
+grocery <- grocery %>% 
+  mutate(unitPrice = round(price / qty))
+```
+
+### 前6名產品價格波動
+```{r}
+grocery %>% 
+  semi_join(top6product, by = "product") %>% 
+  group_by(date, product) %>% 
+  summarize(unitPrice = mean(unitPrice), 
+            sum_qty = sum(qty)) %>% 
+  arrange(date, product) %>% 
+  ggplot(aes(date, unitPrice, color = factor(product))) +
+    geom_line() +
+    geom_line(aes(x = date, y = sum_qty), linetype = "dotdash") +
+    facet_wrap(~ product, scales = "free_y") +
+    theme(legend.position = "none")
+```
+
+## 交易資料整理
+
+```{r}
+transaction <- grocery %>% 
+  group_by(tid) %>% 
+  summarise(
+    date = date[1],              # 交易日期  
+    customer = customer[1],      # 顧客 ID
+    age = age[1],                # 顧客 年齡級別
+    area = area[1],              # 顧客 居住區別
+    tcount = n(),                # 交易項目(總)數
+    pieces = sum(qty),           # 產品(總)件數
+    items = n_distinct(category),# 產品種類數
+    total = sum(price),          # 交易(總)金額
+    gross = sum(price - cost)    # 毛利
+  )
+```
+
+建立完交易資料後，一樣處理outlier。
+```{r}
+sapply(transaction[, 6:9], quantile, prob = c(.999, .9995, .9999))
+transaction <- subset(transaction, tcount <= 62 & pieces < 95 & total < 16000) # 119328
+```
+
+```{r}
+par(cex = 0.8)
+hist(transaction$date, "weeks", freq = T, las = 2, col = "lightblue", main = "No. Transaction per Week")
+```
+
+### 依週、顧客年齡畫消費頻率熱圖
+```{r}
+library(d3heatmap)
+table(transaction$age, format(transaction$date, "%u")) %>% 
+  {./rowSums(.)} %>% 
+  as.data.frame.matrix() %>% 
+  d3heatmap(F, F, col = colorRamp(c("seagreen", "lightyellow", "red")))
+```
+可以看出消費頻率比較高的集中在週日與30~40歲壯年人口，整體來說假日的消費頻率比較高。
+
+### 依週、地區畫消費頻率熱圖
+```{r}
+table(transaction$area, format(transaction$date, "%u")) %>% 
+  {./rowSums(.)} %>% 
+  as.data.frame.matrix() %>% 
+  d3heatmap(F, F, col = colorRamp(c("seagreen", "lightyellow", "red")))
+```
+
+### 地區、年齡消費頻率熱圖
+
+```{r}
+table(transaction$age, transaction$area) %>% 
+  {./rowSums(.)} %>% 
+  as.data.frame.matrix() %>% 
+  d3heatmap(F, F, col = colorRamp(c("seagreen", "lightyellow", "red")))
+```
+
+### 各個區域的交易發生時間
+```{r}
+transaction %>%
+  group_by(area, date) %>%
+  summarize(num_tran = n()) %>% 
+  ggplot(aes(x = date, y = num_tran)) + 
+  geom_bar(aes(x = date, y = num_tran, color = area), stat = "identity", alpha = 0.8) +
+  facet_wrap(~area) + 
+  labs(y = "# Transactions", x = "Date")
+```
+
+
+## 顧客資料整理
+
+我們假設今天為拿到資料的隔天2001/3/1要來分析與做行銷策略。
+```{r}
+today <- max(grocery$date) + 1
+customer <- transaction %>% 
+  mutate(days = as.integer(today - date)) %>% 
+  group_by(customer) %>% 
+  summarise(
+    recency = min(days),                        # 最近一次購買距今天數
+    senior = max(days),                         # 第一次購買距今天數
+    coming = as.integer(!recency == senior),    # 第一次來買有沒有再來買一次
+    freq = n(),                                 # 消費次數
+    money = round(mean(total), 2),              # 平均購買金額
+    revenue = sum(total),                       # 公司在他身上拿了多少
+    net = sum(gross),                           # 公司淨賺他多少
+    items = items[1],                           # 不同產品種類數
+    age = age[1],
+    area = area[1],
+    since = min(date)                           # 第一次購買日期
+  ) %>% 
+  arrange(customer)
+```
+
+視覺化RFM，看分佈
+```{r}
+par(mfrow = c(2, 2))
+hist(customer$recency, main = "recency")
+hist(log10(customer$freq), main = "log_frequency")
+hist(log10(customer$money), main = "log_money")
+hist(customer$senior, main = "senior")
+```
+
+### 檢查每個dataframe有沒有NA
+```{r}
+map(list("grocery" = grocery, "transaction" = transaction, "customer" = customer), function(x) colSums(is.na(x)))
+```
+
+## 集群分析
+
+先用階層式分群來分析顧客資料
+
+### hierarchical clustering
+
+linkage algo 用 complete方式
+```{r}
+#rfm_dist <- dist(scale(customer[, c("recency", "coming", "freq", "money", "items")]))
+#rfm_hc <- hclust(rfm_dist, method = "complete");rm(rfm_dist)
+load("rfm_hc.RData")
+plot(rfm_hc)
+```
+
+```{r}
+rfm_cluster <- cutree(rfm_hc, h = 11)
+table(rfm_cluster)
+customer <- mutate(customer, cluster = rfm_cluster)
+```
+先分4群看看，看起來會是比較好的結果，接下來畫RFM以及分群結果
+
+### 顧客分隔
+```{r}
+group_by(customer, cluster) %>% 
+  summarise(
+    recency = mean(recency), 
+    freq = mean(freq), 
+    money = mean(money), 
+    size = n()
+  ) %>% 
+  mutate(revenue = size * money / 1000 )  %>% 
+  filter(size > 1) %>% 
+  ggplot(aes(x = freq, y = money)) +
+  geom_point(aes(size = revenue, col = recency), alpha=0.5) +
+  scale_size(range = c(4, 40)) +
+  scale_color_gradient(low = "green", high = "red") +
+  scale_x_log10() + scale_y_log10() + 
+  geom_text(aes(label = size )) +
+  theme_bw() + guides(size = F) +
+  labs(title = "Customer Segements",
+       subtitle = "(bubble_size:revenue_contribution; text:group_size)",
+       color = "Recency") +
+  xlab("Frequency (log)") + ylab("Average Transaction Amount (log)")
+```
+
+接下來我們好奇這4群顧客變數分別平均會是多少，看他們的特性。
+```{r}
+customer %>% 
+  select(-c(customer, age, area, since)) %>% 
+  group_by(cluster) %>% 
+  summarise_all(funs(mean(.)))
+```
+
+
+### 群組特性圖
+```{r}
+par(cex = 0.7)
+customer %>% 
+  select(-c(1, 4, 10, 11, 12, 13)) %>% 
+  mutate_all(scale) %>% 
+  split(customer$cluster) %>% 
+  sapply(colMeans) %>% 
+  barplot(beside = T, col = rainbow(7))
+legend('topleft',legend=colnames(customer[, -c(1, 4, 10, 11, 12, 13)]), fill = rainbow(7))
+```
+
+
+
+### kmeans
+
+```{r}
+tot_withinss <- map_dbl(1:10,  function(k){
+  model <- kmeans(x = customer %>% select(-c("customer", "age", "area", "since", "cluster")), centers = k)
+  model$tot.withinss
+})
+
+elbow_df <- data.frame(
+  k = 1:10 ,
+  tot_withinss = tot_withinss
+)
+
+# Plot the elbow plot
+ggplot(elbow_df, aes(x = k, y = tot_withinss)) +
+  geom_line() +
+  scale_x_continuous(breaks = 1:10)
+```
+由上圖可知，k=3或4模型的複雜度增加沒有顯著增長，最好的分群方式會是分3或4群為主，將資料用kmeans model分群。
+
+#### k=3
+```{r}
+rfm_km.3 <- customer %>% 
+  select(-c("customer", "age", "area", "since", "cluster")) %>% 
+  kmeans(centers = 3)
+table(rfm_km.3$cluster)
+```
+
+
+```{r}
+customer %>% 
+  mutate(cluster = rfm_km.3$cluster) %>% 
+  group_by(cluster) %>% 
+  summarise(
+    recency = mean(recency), 
+    freq = mean(freq), 
+    money = mean(money), 
+    size = n()
+  ) %>% 
+  mutate(revenue = size * money / 1000 )  %>% 
+  filter(size > 1) %>% 
+  ggplot(aes(x = freq, y = money)) +
+  geom_point(aes(size = revenue, col = recency), alpha=0.5) +
+  scale_size(range = c(4,40)) +
+  scale_color_gradient(low="green", high="red") +
+  scale_x_log10() + scale_y_log10() + 
+  geom_text(aes(label = size )) +
+  theme_bw() + guides(size = F) +
+  labs(title="Customer Segements",
+       subtitle="(bubble_size:revenue_contribution; text:group_size)",
+       color="Recency") +
+  xlab("Frequency (log)") + ylab("Average Transaction Amount (log)")
+```
+
+#### k=4
+```{r}
+rfm_km.4 <- customer %>% 
+  select(-c("customer", "age", "area", "since", "cluster")) %>% 
+  kmeans(centers = 4)
+table(rfm_km.4$cluster)
+```
+
+
+```{r}
+customer %>% 
+  mutate(cluster = rfm_km.4$cluster) %>% 
+  group_by(cluster) %>% 
+  summarise(
+    recency = mean(recency), 
+    freq = mean(freq), 
+    money = mean(money), 
+    size = n()
+  ) %>% 
+  mutate(revenue = size * money / 1000 )  %>% 
+  filter(size > 1) %>% 
+  ggplot(aes(x = freq, y = money)) +
+  geom_point(aes(size = revenue, col = recency), alpha=0.5) +
+  scale_size(range = c(4,40)) +
+  scale_color_gradient(low="green", high="red") +
+  scale_x_log10() + scale_y_log10() + 
+  geom_text(aes(label = size )) +
+  theme_bw() + guides(size = F) +
+  labs(title="Customer Segements",
+       subtitle="(bubble_size:revenue_contribution; text:group_size)",
+       color="Recency") +
+  xlab("Frequency (log)") + ylab("Average Transaction Amount (log)")
+```
+
+
+#### k=7
+
+```{r}
+library(factoextra)
+set.seed(2020)
+rfm_km.7 <- customer %>% 
+  select(-c("customer", "age", "area", "since", "cluster")) %>% 
+  kmeans(centers = 7, nstart = 20)
+table(rfm_km.7$cluster)
+```
+
+```{r}
+customer %>% 
+  mutate(cluster = rfm_km.7$cluster) %>% 
+  group_by(cluster) %>% 
+  summarise(
+    recency = mean(recency), 
+    freq = mean(freq), 
+    money = mean(money), 
+    size = n()
+  ) %>% 
+  mutate(revenue = size * money / 1000 )  %>% 
+  filter(size > 1) %>% 
+  ggplot(aes(x = freq, y = money)) +
+  geom_point(aes(size = revenue, col = recency), alpha=0.5) +
+  scale_size(range = c(4,40)) +
+  scale_color_gradient(low="green", high="red") +
+  scale_x_log10() + scale_y_log10() + 
+  geom_text(aes(label = size )) +
+  theme_bw() + guides(size = F) +
+  labs(title="Customer Segements",
+       subtitle="(bubble_size:revenue_contribution; text:group_size)",
+       color="Recency") +
+  xlab("Frequency (log)") + ylab("Average Transaction Amount (log)")
+```
+
+## 分群資料探索
+
+將顧客分結果join回去交易資料
+```{r}
+customer_group <- customer %>% select(customer, cluster)
+transaction_cluster <- transaction %>% left_join(customer_group, by = "customer")
+grocery_cluster <- grocery %>% left_join(customer_group, by = "customer")
+```
+
+### 分群顧客利潤最高產品
+觀看分群顧客最喜歡哪些產品，能帶來較大獲利
+```{r}
+grocery_cluster %>% 
+  filter(!is.na(cluster)) %>% 
+  mutate(gross = price - cost) %>% 
+  group_by(cluster, product) %>% 
+  summarize(
+    tcount = n(),
+    sum_total = sum(price),
+    sum_gross = sum(gross)
+  ) %>% 
+  arrange(desc(sum_gross)) %>% 
+  top_n(5) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = product, y = sum_gross)) +
+    geom_col(aes(fill = product), alpha = 0.8) +
+    facet_wrap(~ cluster, scales = "free") +
+    theme(axis.text.x = element_text(angle = 25))
+```
+
+```{r}
+table(customer$age, customer$cluster) %>% 
+  {./rowSums(.)} %>% 
+  as.data.frame.matrix() %>% 
+  d3heatmap(F, F, col = colorRamp(c("seagreen", "lightyellow", "red")))
+  
+```
+
+## 資料切割
+
+取出2001-02-01之前的資料，然後做跟上面一樣的事情
+```{r}
+grocery.x <- subset(grocery, date < ymd("2001-02-01"))
+tail(grocery.x, 10)
+```
+
+### 11~1月的交易資料
+```{r}
+transaction.x <- grocery.x %>% 
+  group_by(tid) %>% 
+  summarise(
+    date = date[1],              # 交易日期  
+    customer = customer[1],      # 顧客 ID
+    age = age[1],                # 顧客 年齡級別
+    area = area[1],              # 顧客 居住區別
+    tcount = n(),                # 交易項目(總)數
+    pieces = sum(qty),           # 產品(總)件數
+    items = n_distinct(category),# 產品種類數
+    total = sum(price),          # 交易(總)金額
+    gross = sum(price - cost)    # 毛利
+  )
+```
+
+```{r}
+sapply(transaction.x[, 6:10], quantile, prob = c(.999, .9995, .9999))
+transaction.x <- subset(transaction.x, tcount <= 64 & pieces <= 98 & total <= 11261) 
+```
+
+### 11~1月的顧客資料
+```{r}
+max_date <- max(transaction.x$date)
+customer.x <- transaction.x %>% 
+  mutate(days = as.integer(max_date - date)) %>% 
+  group_by(customer) %>% 
+  summarise(
+    recency = min(days),                        # 最近一次購買距今天數
+    senior = max(days),                         # 第一次購買距今天數
+    coming = as.integer(!recency == senior),    # 第一次來買有沒有再來買一次
+    freq = n(),                                 # 消費次數
+    money = round(mean(total), 2),              # 平均購買金額
+    revenue = sum(total),                       # 公司在他身上拿了多少
+    net = sum(gross),                           # 公司淨賺他多少
+    items = items[1],                           # 不同產品種類數
+    age = age[1],
+    area = area[1],
+    since = min(date)                           # 第一次購買日期
+  ) %>% 
+  arrange(customer)
+```
+
+### 準備 predictor Y
+
+Y: 2月是否有購買
+
+先準備每個顧客2月的購買金額，若沒有則為`NA`。
+```{r}
+feb_customer <- transaction %>% 
+  filter(date >= ymd("2001-02-01")) %>% 
+  group_by(customer) %>% 
+  summarize(feb_amount = sum(total))
+```
+
+將2月顧客的消費金額`left_join`回去11~1月的顧客資料，若2月沒有購買`feb_amount`會顯示NA，新增一個欄位`buy`是2月有購買不是`NA`為`TRUE`。
+```{r}
+customer.x <- left_join(customer.x, feb_customer, by = "customer")
+customer.x$buy <- !is.na(customer.x$feb_amount)
+```
+
+### 依年齡分平均購買比例
+```{r}
+tapply(customer.x$buy, customer.x$age, mean) %>% 
+  barplot(xlab = "Age", ylab = "Mean of Buy")
+abline(h = mean(customer.x$buy), col = 'red')
+```
+
+### 依地區分平均購買比例
+```{r}
+tapply(customer.x$buy, customer.x$area, mean) %>% 
+  barplot(xlab = "Area", ylab = "Mean of Buy")
+abline(h = mean(customer.x$buy), col = 'red')
+```
+
+因為`transaction.x`處理過outlier，確保原`grocery.x`的資料沒有outlier。
+```{r}
+grocery.x <- filter(grocery.x, customer %in% customer.x$customer)
+```
+
+
+## 建立模型
+
+### 預測「是否購買」
+
+#### 準備訓練與測試資料
+```{r}
+library(caTools)
+set.seed(2019)
+spl.x <-  sample.split(customer.x$buy, SplitRatio = 0.7)
+c(nrow(customer.x), sum(spl.x), sum(!spl.x))
+```
+
+檢查training&testing分佈是否一致
+```{r}
+cbind(customer.x, spl.x) %>% 
+  ggplot(aes(x = log(feb_amount), fill = spl.x)) + 
+  geom_density(alpha = 0.5)
+```
+
+```{r}
+buy_train <- customer.x[spl.x, ]
+buy_test <- customer.x[!spl.x, ]
+```
+
+#### logistic model
+```{r}
+buy.model <- glm(buy ~ money + recency * freq + items, buy_train, family = binomial)
+summary(buy.model)
+```
+套用logistic function發現只有`revenue`不顯著。
+
+混淆矩陣
+```{r}
+buy.pred <- predict(buy.model, buy_test, type = "response")
+cm <- table(actual = buy_test$buy, predict = buy.pred > 0.5); cm
+cm %>% {sum(diag(.))/sum(.)}
+```
+
+ROC AUC=0.7334
+```{r}
+ROC <- roc(buy_test$buy, buy.pred)
+plot(ROC, col = "red")
+auc(ROC)
+```
+
+
+#### decision tree
+```{r}
+buy_train$buy <- buy_train$buy %>% as.integer() %>% as.factor()
+buy_test$buy <- buy_test$buy %>% as.integer() %>% as.factor()
+```
+
+```{r}
+library(rpart)
+buy_tree <- rpart(buy ~ ., data = buy_train[, -c(1, 10, 11, 12, 13)], method = "class", control = rpart.control(cp = 0, maxdepth = 10))
+```
+
+```{r}
+library(rpart.plot)
+# rpart.plot(buy_tree_pruned)
+rpart.plot(buy_tree, type = 3, box.palette = c("red", "green"), fallen.leaves = TRUE)
+```
+
+```{r}
+buy.tree.pred <- predict(buy_tree, buy_test, type = "class")
+table(buy.tree.pred, buy_test$buy)
+mean(buy.tree.pred == buy_test$buy)
+```
+
+修剪決策樹，發現準確度有微微上升至70%
+```{r}
+buy_tree_pruned <- prune(buy_tree, cp = 0.0015)
+buy_test$pred <- predict(buy_tree_pruned, buy_test, type = "class")
+mean(buy_test$pred == buy_test$buy)
+```
+#### Random Forest
+
+試試看隨機森林的準確度
+```{r}
+library(randomForest)
+buy_forest <- randomForest(buy ~ ., data = buy_train[, -c(1, 10, 11, 12, 13)])
+buy_test$pred <- predict(buy_forest, buy_test, type = "class")
+mean(buy_test$pred == buy_test$buy)
+```
+
+### 預測「購買金額」
+
+只篩選有回購的顧客，並對金額取log10
+```{r}
+customer.y <- subset(customer.x, buy) %>% 
+  mutate(money = money + 1, revenue = revenue + 1, feb_amount = feb_amount + 1) %>% 
+  mutate_at(c("money", "revenue", "feb_amount"), log10)
+spl.y <- sample(nrow(customer.y), nrow(customer.y) * 0.7)
+amount_train <- customer.y[spl.y, ]
+amount_test <- customer.y[-spl.y, ]
+```
+
+
+```{r}
+lm.model <- lm(feb_amount ~ money + recency * freq + revenue, amount_train)
+summary(lm.model)
+```
+
+```{r}
+plot(amount_train$feb_amount, predict(lm.model), col = 'pink', cex = 0.65)
+abline(0, 1,col='red') 
+```
+
+## 行銷規劃
+
+篩選出2000-12-01~20001-02-28
+```{r}
+B <- transaction %>% 
+  filter(date >= as.Date("2000-12-01")) %>% 
+  mutate(days = as.integer(difftime(today, date, units = "days"))) %>% 
+  group_by(customer) %>% 
+  summarise(
+    recency = min(days),                        # 最近一次購買距今天數
+    senior = max(days),                         # 第一次購買距今天數
+    coming = as.integer(!recency == senior),    # 第一次來買有沒有再來買一次
+    freq = n(),                                 # 消費次數
+    money = round(mean(total), 2),              # 平均購買金額
+    revenue = sum(total),                       # 公司在他身上拿了多少
+    net = sum(gross),                           # 公司淨賺他多少
+    items = items[1],                           # 不同產品種類數
+    age = age[1],
+    area = area[1],
+    since = min(date)                           # 第一次購買日期
+  )
+nrow(B) #28531
+```
+
+預測3月購買機率與金額
+```{r}
+B$buy <- predict(buy.model, B, type="response")
+B2 <- B %>% mutate_at(c("money","revenue"), log10)
+B$rev <- 10 ^ predict(lm.model, B2); rm(B2)
+```
+
+### 購買機率、購買金額的機率分佈
+```{r}
+par(mfrow = c(1,2), cex = 0.8)
+hist(B$buy)
+hist(log(B$rev,10))
+```
+
+```{r}
+effect = .5 # 回購機率
+cost = 200   # 成本假設
+``` 
+
+```{r}
+Target <- B %>% inner_join(customer_group, by = "customer")
+Target$ExpReturn <- (effect - Target$buy) * Target$rev - cost
+Target %>% 
+  filter(Target$ExpReturn > 0) %>%
+  group_by(cluster) %>% 
+  summarise(
+    No.Target = n(),
+    AvgROI = mean(ExpReturn),
+    TotalROI = sum(ExpReturn)
+  ) %>% 
+  filter(cluster == 4)
+```
+
+```{r}
+target4 <- filter(Target, cluster == 4)
+random <- sample(1:nrow(target4), nrow(target4))
+c("no.target" = round(length(random)), 
+  "AvgROI" = mean(target4[random, ]$rev - 100),
+  "TotalROI" = sum(target4[random, ]$rev - 100))
+```
+
+### 第三群增加金額
+```{r}
+group3 <- Target %>% 
+  filter(cluster == 3) %>% 
+  mutate(ExpReturn = rev * 1.2 * 0.5 - 150) %>% 
+  group_by(cluster) %>% 
+  summarize(
+    No.Target = round(n() * 0.5),
+    AvgROI = mean(ExpReturn),
+    TotalROI = sum(ExpReturn)
+  )
+
+```
+
